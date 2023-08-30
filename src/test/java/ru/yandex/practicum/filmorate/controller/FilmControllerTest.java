@@ -41,14 +41,14 @@ class FilmControllerTest {
     }
 
     @Test
-    void blankNameReturnsCode500() throws IOException, InterruptedException {
+    void blankNameReturnsCode400() throws IOException, InterruptedException {
         Film film = new Film("", "Good one", LocalDate.of(2000, 1, 1), 100);
 
         String json = gson.toJson(film);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -63,7 +63,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void tooLongDescriptionReturnsCode500() throws IOException, InterruptedException {
+    void tooLongDescriptionReturnsCode400() throws IOException, InterruptedException {
         Film film = new Film("The best", "Good one, but the only thing I can say about it," +
                 "that too mane people who have been watching it for too long got extremely bored, I mean really (!) extremely, Good one, but the only thing I can say about it, " +
                 " that too mane people who have been watching it for too long got extremely bored, I mean really (!) extremely",
@@ -73,7 +73,7 @@ class FilmControllerTest {
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -88,14 +88,14 @@ class FilmControllerTest {
     }
 
     @Test
-    void negDurationReturnsCode500() throws IOException, InterruptedException {
+    void negDurationReturnsCode400() throws IOException, InterruptedException {
         Film film = new Film("The best", "Good one", LocalDate.of(1954, 1, 1), -5);
 
         String json = gson.toJson(film);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
