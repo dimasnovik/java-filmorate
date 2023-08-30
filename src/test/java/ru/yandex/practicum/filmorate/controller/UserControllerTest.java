@@ -41,14 +41,14 @@ class UserControllerTest {
     }
 
     @Test
-    void blankLoginReturnsCode500() throws IOException, InterruptedException {
+    void blankLoginReturnsCode400() throws IOException, InterruptedException {
         User user = new User("test@yandex.ru", "", LocalDate.of(2000, 1, 1));
 
         String json = gson.toJson(user);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -98,14 +98,14 @@ class UserControllerTest {
     }
 
     @Test
-    void wrongBirthDayReturnsCode500() throws IOException, InterruptedException {
+    void wrongBirthDayReturnsCode400() throws IOException, InterruptedException {
         User user = new User("test@yandex.ru", "driver", LocalDate.of(2025, 1, 1));
 
         String json = gson.toJson(user);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -121,25 +121,26 @@ class UserControllerTest {
     }
 
     @Test
-    void wrongEmailReturnsCode500() throws IOException, InterruptedException {
+    void wrongEmailReturnsCode400() throws IOException, InterruptedException {
         User user = new User("@yandex.ru", "driver", LocalDate.of(2000, 1, 1));
 
         String json = gson.toJson(user);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
-    void blankEmailReturnsCode500() throws IOException, InterruptedException {
+    void blankEmailReturnsCode400() throws IOException, InterruptedException {
         User user = new User("", "driver", LocalDate.of(2000, 1, 1));
 
         String json = gson.toJson(user);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        System.out.println(response.body());
+        assertEquals(400, response.statusCode());
     }
 
 }
