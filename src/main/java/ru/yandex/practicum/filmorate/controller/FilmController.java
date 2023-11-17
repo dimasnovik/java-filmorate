@@ -67,8 +67,8 @@ public class FilmController {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleNoSuchFilm(final InvalidValueException e) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleInvalidDate(final InvalidValueException e) {
         return Map.of("Validation error", e.getMessage());
     }
 
