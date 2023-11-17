@@ -77,14 +77,14 @@ class FilmControllerTest {
     }
 
     @Test
-    void tooEarlyReleaseReturnsCode500() throws IOException, InterruptedException {
+    void tooEarlyReleaseReturnsCode400() throws IOException, InterruptedException {
         Film film = new Film("The best", "Good one", LocalDate.of(1895, 1, 1), 100);
 
         String json = gson.toJson(film);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").POST(body).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -116,7 +116,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void updateFailureReturnsCode500() throws IOException, InterruptedException {
+    void updateFailureReturnsCode404() throws IOException, InterruptedException {
         Film film = new Film("The best", "Good one", LocalDate.of(1985, 1, 1), 100);
         Film film2 = new Film("The best", "Good one", LocalDate.of(1985, 1, 1), 120);
         film2.setId(3);
@@ -129,6 +129,6 @@ class FilmControllerTest {
         final HttpRequest.BodyPublisher body2 = HttpRequest.BodyPublishers.ofString(json2);
         HttpRequest request2 = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").PUT(body2).build();
         HttpResponse<String> response2 = client.send(request2, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response2.statusCode());
+        assertEquals(404, response2.statusCode());
     }
 }
