@@ -3,11 +3,10 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -20,9 +19,11 @@ public class Film {
     @Size(max = 200)
     private final String description;
 
-    @Past
+    @PastOrPresent
     private final LocalDate releaseDate;
 
     @Positive
     private final int duration;
+
+    private final Set<Integer> usersLiked = new HashSet<>();
 }
