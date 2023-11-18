@@ -36,10 +36,4 @@ public class ErrorHandler {
     public Map<String, String> handleUserAlreadyExistException(final UserAlreadyExistException e) {
         return Map.of("Wrong user", e.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleThrowable(final Throwable e) {
-        return Map.of("Wrong ID", e.getMessage());
-    }
 }
