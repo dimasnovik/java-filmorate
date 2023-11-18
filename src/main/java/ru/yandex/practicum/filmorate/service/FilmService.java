@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private static final LocalDate FIRST_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
@@ -74,7 +75,7 @@ public class FilmService {
     }
 
     private void checkReleaseDate(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(FIRST_FILM_DATE)) {
             log.warn("Дата релиза не может быть раньше 28 декабря 1895 года");
             throw new InvalidValueException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
