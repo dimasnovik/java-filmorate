@@ -81,7 +81,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateFailureReturnsCode500() throws IOException, InterruptedException {
+    void updateFailureReturnsCode400() throws IOException, InterruptedException {
         User user = new User("test@yandex.ru", "driver", LocalDate.of(2000, 1, 1));
         User user2 = new User("test@yandex.ru", "driver", LocalDate.of(1996, 1, 1));
         user2.setId(3);
@@ -94,7 +94,7 @@ class UserControllerTest {
         final HttpRequest.BodyPublisher body2 = HttpRequest.BodyPublishers.ofString(json2);
         HttpRequest request2 = HttpRequest.newBuilder().uri(uri).setHeader("Content-Type", "application/json").PUT(body2).build();
         HttpResponse<String> response2 = client.send(request2, HttpResponse.BodyHandlers.ofString());
-        assertEquals(500, response2.statusCode());
+        assertEquals(404, response2.statusCode());
     }
 
     @Test
