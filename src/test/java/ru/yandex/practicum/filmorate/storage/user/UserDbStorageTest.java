@@ -125,6 +125,5 @@ class UserDbStorageTest {
                 .isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(commons);
-
     }
 }
