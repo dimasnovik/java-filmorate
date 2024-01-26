@@ -10,9 +10,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,33 +42,23 @@ public class FilmService {
         return filmStorage.getAll();
     }
 
-    public Film addLike(int userId, int filmId) {
-        Film film = filmStorage.getById(filmId);
+    public void addLike(int filmId, int userId) {
         userStorage.getById(userId);
-        if (film.getUsersLiked().add(userId)) {
-            log.info(String.format("Пользователь с id = %d поставил лайк фильму с id = %d", userId, filmId));
-        } else {
-            log.info(String.format("Пользователь с id = %d уже ставил лайк фильму с id = %d", userId, filmId));
-        }
-        return film;
+        filmStorage.addLike(filmId, userId);
     }
 
-    public Film removeLike(int userId, int filmId) {
-        Film film = filmStorage.getById(filmId);
+    public void removeLike(int filmId, int userId) {
         userStorage.getById(userId);
-        if (film.getUsersLiked().remove(userId)) {
-            log.info(String.format("Пользователь с id = %d убрал лайк фильму с id = %d", userId, filmId));
-        } else {
-            log.info(String.format("Пользователь с id = %d не ставил/уже убрал лайк фильму с id = %d", userId, filmId));
-        }
-        return film;
+        filmStorage.removeLike(filmId, userId);
+
     }
 
-    public List<Film> getTopFilms(int count) {
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.<Film>comparingInt(film -> film.getUsersLiked().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<Film> getTopFilms(int count) {
+        return filmStorage.getPopular(count);
+    }
+
+    public Collection<Integer> getLikes(int id) {
+        return filmStorage.getLikes(id);
     }
 
     private void checkReleaseDate(Film film) {

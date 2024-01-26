@@ -35,7 +35,7 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        log.info(String.format("Получен GET запрос на адрес: %s", "/films"));
+        log.info(String.format("Получен PUT запрос на адрес: %s", "/films"));
         return filmService.update(film);
     }
 
@@ -46,15 +46,21 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+    public void addLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         log.info(String.format("Получен PUT запрос на адрес: %s/%d/like/%d", "/films", id, userId));
-        return filmService.addLike(userId, id);
+        filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+    public void removeLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
         log.info(String.format("Получен DELETE запрос на адрес: %s/%d/like/%d", "/films", id, userId));
-        return filmService.removeLike(userId, id);
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/{id}/like")
+    public Collection<Integer> getLikesOfFilm(@PathVariable("id") int id) {
+        log.info(String.format("Получен GET запрос на адрес: %s/%d/like", "/films", id));
+        return filmService.getLikes(id);
     }
 
     @GetMapping("/popular")

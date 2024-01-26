@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 public class Film {
@@ -26,6 +24,9 @@ public class Film {
     @Positive
     private final int duration;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private final Set<Integer> usersLiked = new HashSet<>();
+    private final TreeSet<Genre> genres = new TreeSet<>();
+
+    private int rate;
+    @NotNull
+    private final Mpa mpa;
 }
