@@ -10,12 +10,19 @@ import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNoSuchFilm(final NoSuchFilmException e) {
+        return Map.of("Wrong ID", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNoSuchElement(final NoSuchElementException e) {
         return Map.of("Wrong ID", e.getMessage());
     }
 
