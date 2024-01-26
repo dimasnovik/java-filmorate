@@ -18,11 +18,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class MpaDaoImplTest {
     private final JdbcTemplate jdbcTemplate;
+
     @Test
     public void testGet() {
-        Map<Integer,String> mpaMap = Map.of(1,"G",2,"PG",3,"PG-13",4,"R",5,"NC-17");
+        Map<Integer, String> mpaMap = Map.of(1, "G", 2, "PG", 3, "PG-13", 4, "R", 5, "NC-17");
         Collection<Mpa> mpas = new ArrayList<>();
-        mpaMap.forEach((k,v) -> mpas.add(new Mpa(k,v)));
+        mpaMap.forEach((k, v) -> mpas.add(new Mpa(k, v)));
         Collection<Mpa> sortedMpas = mpas.stream().sorted(Comparator.comparingInt(Mpa::getId)).collect(Collectors.toList());
         MpaDao mpaDao = new MpaDaoImpl(jdbcTemplate);
         Collection<Mpa> savedMpas = mpaDao.getAll();
@@ -30,7 +31,7 @@ public class MpaDaoImplTest {
         Assertions.assertThat(savedMpa)
                 .isNotNull()
                 .usingRecursiveComparison()
-                .isEqualTo(new Mpa(1,"G"));
+                .isEqualTo(new Mpa(1, "G"));
 
         Assertions.assertThat(savedMpas)
                 .isNotNull()
@@ -38,13 +39,3 @@ public class MpaDaoImplTest {
                 .isEqualTo(sortedMpas);
     }
 }
-//INSERT INTO MPA(MPA_NAME)
-//VALUES ('G');
-//INSERT INTO MPA(MPA_NAME)
-//VALUES ('PG');
-//INSERT INTO MPA(MPA_NAME)
-//VALUES ('PG-13');
-//INSERT INTO MPA(MPA_NAME)
-//VALUES ('R');
-//INSERT INTO MPA(MPA_NAME)
-//VALUES ('NC-17');
