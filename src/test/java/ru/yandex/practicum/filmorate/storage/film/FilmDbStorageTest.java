@@ -23,6 +23,7 @@ import java.util.List;
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     private final GenreStorage genreStorage;
+
     @AfterEach
     public void resetDb() {
         jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
@@ -33,7 +34,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
         filmStorage.add(film1);
 
         Film savedFilm = filmStorage.getById(1);
@@ -49,7 +50,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
         filmStorage.add(film1);
         film1.getGenres().add(new Genre(1, "Комедия"));
         filmStorage.update(film1);
@@ -66,7 +67,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
         filmStorage.add(film1);
         Film film2 = new Film("film2", "bad film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
@@ -87,7 +88,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
         filmStorage.add(film1);
 
         User user1 = new User("user1@email.ru", "vanya123", LocalDate.of(1990, 1, 1));
