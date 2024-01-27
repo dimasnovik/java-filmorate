@@ -37,18 +37,19 @@ public class GenreDbStorage implements GenreStorage {
     private RowMapper<Genre> genreRowMapper() {
         return (rs, rowNum) -> new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME"));
     }
+
     public void saveGenresOfFilm(Film film) {
         jdbcTemplate.update("delete from FILMS_GENRES where FILM_ID = ?", film.getId());
         List<Object[]> data = new ArrayList<>();
         Collection<Genre> genres = film.getGenres();
         for (Genre genre : genres) {
-            Object[] row = new Integer[]{film.getId(),genre.getId()};
+            Object[] row = new Integer[]{film.getId(), genre.getId()};
             data.add(row);
         }
         if (!film.getGenres().isEmpty()) {
             jdbcTemplate.batchUpdate("insert into FILMS_GENRES(FILM_ID, GENRE_ID)  values(?,?)", data);
         } else {
-            log.info(String.format("у  фильма с id = %d  не указаны жанры",film.getId()));
+            log.info(String.format("у  фильма с id = %d  не указаны жанры", film.getId()));
         }
     }
 }

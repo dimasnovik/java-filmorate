@@ -9,5 +9,6 @@ public interface GenreStorage {
     Genre getById(int id);
 
     Collection<Genre> getAll();
+
     void saveGenresOfFilm(Film film);
 }
