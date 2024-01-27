@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -18,16 +19,21 @@ import java.util.Collection;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
     private static final LocalDate FIRST_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     public Film create(Film film) {
         checkReleaseDate(film);
-        return filmStorage.add(film);
+        filmStorage.add(film);
+        genreStorage.saveGenresOfFilm(film);
+        return film;
     }
 
     public Film update(Film film) {
         checkReleaseDate(film);
-        return filmStorage.update(film);
+        filmStorage.update(film);
+        genreStorage.saveGenresOfFilm(film);
+        return film;
     }
 
     public Film getById(int id) {

@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,11 +21,10 @@ import java.util.Map;
 
 @Component
 @Primary
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
-    private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public Film add(Film film) {
@@ -39,7 +37,6 @@ public class FilmDbStorage implements FilmStorage {
                 "MPA_ID", film.getMpa().getId(), "LIKES_COUNT", 0);
         int id = simpleJdbcInsert.executeAndReturnKey(params).intValue();
         film.setId(id);
-        genreStorage.saveGenresOfFilm(film);
         String mpaName = jdbcTemplate.queryForObject("select MPA_NAME from MPA where MPA_ID = ?;",
                 (rs, rowNum) -> rs.getString("MPA_NAME"), film.getMpa().getId());
         film.getMpa().setName(mpaName);
@@ -56,7 +53,6 @@ public class FilmDbStorage implements FilmStorage {
                         "FILM_NAME = ?, RELEASE_DATE = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ? where FILM_ID = ?",
                 film.getName(), film.getReleaseDate().toString(), film.getDescription(),
                 film.getDuration(), film.getMpa().getId(), id);
-        genreStorage.saveGenresOfFilm(film);
 
         String mpaName = jdbcTemplate.queryForObject("select MPA_NAME from MPA where MPA_ID = ?;",
                 (rs, rowNum) -> rs.getString("MPA_NAME"), film.getMpa().getId());

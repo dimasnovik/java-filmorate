@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
@@ -19,10 +17,9 @@ import java.util.Collection;
 import java.util.List;
 
 @JdbcTest
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@AllArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
-    private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
+    private JdbcTemplate jdbcTemplate;
 
     @AfterEach
     public void resetDb() {
@@ -34,7 +31,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         filmStorage.add(film1);
 
         Film savedFilm = filmStorage.getById(1);
@@ -50,16 +47,18 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         filmStorage.add(film1);
-        film1.getGenres().add(new Genre(1, "Комедия"));
-        filmStorage.update(film1);
+        Film film2 = new Film("film2", "good film",
+                LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
+        film2.setId(1);
+        filmStorage.update(film2);
         Film savedFilm = filmStorage.getById(1);
 
         Assertions.assertThat(savedFilm)
                 .isNotNull()
                 .usingRecursiveComparison()
-                .isEqualTo(film1);
+                .isEqualTo(film2);
     }
 
     @Test
@@ -67,7 +66,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         filmStorage.add(film1);
         Film film2 = new Film("film2", "bad film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
@@ -88,7 +87,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate, genreStorage);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         filmStorage.add(film1);
 
         User user1 = new User("user1@email.ru", "vanya123", LocalDate.of(1990, 1, 1));
