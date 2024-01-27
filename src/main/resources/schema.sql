@@ -24,7 +24,7 @@ create table IF NOT EXISTS FILMS
     DESCRIPTION  CHARACTER VARYING(255),
     DURATION     INTEGER               not null,
     MPA_ID       INTEGER               not null,
-    LIKES_COUNT  INTEGER default 0     not null,
+    LIKES_COUNT  INTEGER default 0,
     constraint FILMS_PK
         primary key (FILM_ID),
     constraint FILMS__FK

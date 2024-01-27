@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.dao;
+package ru.yandex.practicum.filmorate.storage.mpa;
 
 import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 
 @Component
 @AllArgsConstructor
-public class MpaDaoImpl implements MpaDao {
+public class MpaDbStorage implements MpaStorage {
     private JdbcTemplate jdbcTemplate;
 
     @Override

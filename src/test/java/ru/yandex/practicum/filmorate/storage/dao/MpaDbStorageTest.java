@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class MpaDaoImplTest {
+public class MpaDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Test
@@ -25,9 +27,9 @@ public class MpaDaoImplTest {
         Collection<Mpa> mpas = new ArrayList<>();
         mpaMap.forEach((k, v) -> mpas.add(new Mpa(k, v)));
         Collection<Mpa> sortedMpas = mpas.stream().sorted(Comparator.comparingInt(Mpa::getId)).collect(Collectors.toList());
-        MpaDao mpaDao = new MpaDaoImpl(jdbcTemplate);
-        Collection<Mpa> savedMpas = mpaDao.getAll();
-        Mpa savedMpa = mpaDao.getById(1);
+        MpaStorage mpaStorage = new MpaDbStorage(jdbcTemplate);
+        Collection<Mpa> savedMpas = mpaStorage.getAll();
+        Mpa savedMpa = mpaStorage.getById(1);
         Assertions.assertThat(savedMpa)
                 .isNotNull()
                 .usingRecursiveComparison()
