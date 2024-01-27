@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class GenreDaoImplTest {
+public class GenreDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Test
@@ -26,9 +28,9 @@ public class GenreDaoImplTest {
         Collection<Genre> genres = new ArrayList<>();
         genreMap.forEach((k, v) -> genres.add(new Genre(k, v)));
         Collection<Genre> sortedGenres = genres.stream().sorted(Comparator.comparingInt(Genre::getId)).collect(Collectors.toList());
-        GenreDao genreDao = new GenreDaoImpl(jdbcTemplate);
-        Collection<Genre> savedGenres = genreDao.getAll();
-        Genre savedGenre = genreDao.getById(1);
+        GenreStorage genreStorage = new GenreDbStorage(jdbcTemplate);
+        Collection<Genre> savedGenres = genreStorage.getAll();
+        Genre savedGenre = genreStorage.getById(1);
         Assertions.assertThat(savedGenre)
                 .isNotNull()
                 .usingRecursiveComparison()

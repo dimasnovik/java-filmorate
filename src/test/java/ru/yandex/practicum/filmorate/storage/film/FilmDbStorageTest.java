@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
-
+    private final GenreStorage genreStorage;
     @AfterEach
     public void resetDb() {
         jdbcTemplate.execute("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1;");
@@ -32,7 +33,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
         filmStorage.add(film1);
 
         Film savedFilm = filmStorage.getById(1);
@@ -48,7 +49,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
         filmStorage.add(film1);
         film1.getGenres().add(new Genre(1, "Комедия"));
         filmStorage.update(film1);
@@ -65,7 +66,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
         filmStorage.add(film1);
         Film film2 = new Film("film2", "bad film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
@@ -86,7 +87,7 @@ public class FilmDbStorageTest {
         Film film1 = new Film("film1", "good film",
                 LocalDate.of(1989, 10, 10), 120, new Mpa(1, "G"));
         film1.setId(1);
-        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate);
+        FilmStorage filmStorage = new FilmDbStorage(jdbcTemplate,genreStorage);
         filmStorage.add(film1);
 
         User user1 = new User("user1@email.ru", "vanya123", LocalDate.of(1990, 1, 1));
