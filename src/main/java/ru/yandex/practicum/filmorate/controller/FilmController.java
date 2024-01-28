@@ -2,16 +2,19 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@Validated
 public class FilmController {
 
     private final FilmService filmService;
@@ -23,30 +26,30 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> getAll() {
-        log.info(String.format("Получен GET запрос на адрес: %s", "/films"));
+        log.info("Получен GET запрос на адрес: /films");
         return filmService.getAll();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info(String.format("Получен POST запрос на адрес: %s", "/films"));
+        log.info("Получен POST запрос на адрес: /films");
         return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        log.info(String.format("Получен PUT запрос на адрес: %s", "/films"));
+        log.info("Получен PUT запрос на адрес: /films");
         return filmService.update(film);
     }
 
     @GetMapping("/{id}")
-    public Film getById(@PathVariable("id") int id) {
+    public Film getById(@Positive @PathVariable("id") int id) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films", id));
         return filmService.getById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") int id, @PathVariable("userId") int userId) {
+    public void addLike(@Positive @PathVariable("id") int id, @PathVariable("userId") int userId) {
         log.info(String.format("Получен PUT запрос на адрес: %s/%d/like/%d", "/films", id, userId));
         filmService.addLike(id, userId);
     }
@@ -58,14 +61,14 @@ public class FilmController {
     }
 
     @GetMapping("/{id}/like")
-    public Collection<Integer> getLikesOfFilm(@PathVariable("id") int id) {
+    public Collection<Integer> getLikesOfFilm(@Positive @PathVariable("id") int id) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d/like", "/films", id));
         return filmService.getLikes(id);
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) int count) {
-        log.info(String.format("Получен GET запрос на адрес: %s/%s", "/films", "popular"));
+    public Collection<Film> getPopular(@Positive @RequestParam(defaultValue = "10") int count) {
+        log.info("Получен GET запрос на адрес: /films/popular");
         return filmService.getTopFilms(count);
     }
 }

@@ -16,20 +16,12 @@ public class UserService {
     private final UserStorage storage;
 
     public User create(User user) {
-        String name = user.getName();
-        if (name == null || name.isBlank()) {
-            user.setName(user.getLogin());
-            log.info("Имя пользователя изменено на логин - " + user.getLogin());
-        }
+        setNameIfBlank(user);
         return storage.add(user);
     }
 
     public User update(User user) {
-        String name = user.getName();
-        if (name == null || name.isBlank()) {
-            user.setName(user.getLogin());
-            log.info("Имя пользователя изменено на логин - " + user.getLogin());
-        }
+        setNameIfBlank(user);
         return storage.update(user);
     }
 
@@ -57,6 +49,14 @@ public class UserService {
 
     public Collection<User> getCommonFriends(int id1, int id2) {
         return storage.getCommonFriends(id1, id2);
+    }
+
+    private void setNameIfBlank(User user) {
+        String name = user.getName();
+        if (name == null || name.isBlank()) {
+            user.setName(user.getLogin());
+            log.info("Имя пользователя изменено на логин - " + user.getLogin());
+        }
     }
 
 }

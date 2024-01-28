@@ -2,7 +2,7 @@ DROP table if exists GENRES,MPA,FILMS,FILMS_GENRES,USERS,FILMS_LIKES,FRIENDS;
 
 create table IF NOT EXISTS GENRES
 (
-    GENRE_ID   INTEGER auto_increment,
+    GENRE_ID   INTEGER,
     GENRE_NAME CHARACTER VARYING(30) not null,
     constraint GENRES_PK
         primary key (GENRE_ID)
@@ -10,7 +10,7 @@ create table IF NOT EXISTS GENRES
 
 create table IF NOT EXISTS MPA
 (
-    MPA_ID   INTEGER auto_increment,
+    MPA_ID   INTEGER,
     MPA_NAME CHARACTER VARYING(10) not null,
     constraint MPA_PK
         primary key (MPA_ID)
@@ -33,6 +33,7 @@ create table IF NOT EXISTS FILMS
 
 create table IF NOT EXISTS USERS
 (
+
     USER_ID  INTEGER auto_increment,
     EMAIL    CHARACTER VARYING     not null,
     LOGIN    CHARACTER VARYING(50) not null,
@@ -41,6 +42,8 @@ create table IF NOT EXISTS USERS
     constraint USERS_PK
         primary key (USER_ID)
 );
+create unique index if not exists USER_EMAIL_UINDEX on USERS (email);
+create unique index if not exists USER_LOGIN_UINDEX on USERS (login);
 
 create table IF NOT EXISTS FILMS_LIKES
 (
