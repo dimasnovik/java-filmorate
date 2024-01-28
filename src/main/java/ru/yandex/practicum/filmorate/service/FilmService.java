@@ -1,40 +1,39 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
     private static final LocalDate FIRST_FILM_DATE = LocalDate.of(1895, 12, 28);
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
 
     public Film create(Film film) {
         checkReleaseDate(film);
-        return filmStorage.add(film);
+        filmStorage.add(film);
+        genreStorage.saveGenresOfFilm(film);
+        return film;
     }
 
     public Film update(Film film) {
         checkReleaseDate(film);
-        return filmStorage.update(film);
+        filmStorage.update(film);
+        genreStorage.saveGenresOfFilm(film);
+        return film;
     }
 
     public Film getById(int id) {
@@ -45,33 +44,23 @@ public class FilmService {
         return filmStorage.getAll();
     }
 
-    public Film addLike(int userId, int filmId) {
-        Film film = filmStorage.getById(filmId);
+    public void addLike(int filmId, int userId) {
         userStorage.getById(userId);
-        if (film.getUsersLiked().add(userId)) {
-            log.info(String.format("Пользователь с id = %d поставил лайк фильму с id = %d", userId, filmId));
-        } else {
-            log.info(String.format("Пользователь с id = %d уже ставил лайк фильму с id = %d", userId, filmId));
-        }
-        return film;
+        filmStorage.addLike(filmId, userId);
     }
 
-    public Film removeLike(int userId, int filmId) {
-        Film film = filmStorage.getById(filmId);
+    public void removeLike(int filmId, int userId) {
         userStorage.getById(userId);
-        if (film.getUsersLiked().remove(userId)) {
-            log.info(String.format("Пользователь с id = %d убрал лайк фильму с id = %d", userId, filmId));
-        } else {
-            log.info(String.format("Пользователь с id = %d не ставил/уже убрал лайк фильму с id = %d", userId, filmId));
-        }
-        return film;
+        filmStorage.removeLike(filmId, userId);
+
     }
 
-    public List<Film> getTopFilms(int count) {
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.<Film>comparingInt(film -> film.getUsersLiked().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<Film> getTopFilms(int count) {
+        return filmStorage.getPopular(count);
+    }
+
+    public Collection<Integer> getLikes(int id) {
+        return filmStorage.getLikes(id);
     }
 
     private void checkReleaseDate(Film film) {
