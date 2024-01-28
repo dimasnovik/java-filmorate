@@ -1,26 +1,16 @@
-INSERT INTO MPA(MPA_NAME)
-VALUES ('G');
-INSERT INTO MPA(MPA_NAME)
-VALUES ('PG');
-INSERT INTO MPA(MPA_NAME)
-VALUES ('PG-13');
-INSERT INTO MPA(MPA_NAME)
-VALUES ('R');
-INSERT INTO MPA(MPA_NAME)
-VALUES ('NC-17');
-
-INSERT INTO GENRES(GENRE_NAME)
-VALUES ('Комедия');
-INSERT INTO GENRES(GENRE_NAME)
-VALUES ('Драма');
-INSERT INTO GENRES(GENRE_NAME)
-VALUES ('Мультфильм');
-INSERT INTO GENRES(GENRE_NAME)
-VALUES ('Триллер');
-INSERT INTO GENRES(GENRE_NAME)
-VALUES ('Документальный');
-INSERT INTO GENRES(GENRE_NAME)
-VALUES ('Боевик');
+merge into MPA (MPA_ID, MPA_NAME)
+    values (1, 'G'),
+           (2, 'PG'),
+           (3, 'PG-13'),
+           (4, 'R'),
+           (5, 'NC-17');
+merge into GENRES (GENRE_ID, GENRE_NAME)
+    values (1, 'Комедия'),
+           (2, 'Драма'),
+           (3, 'Мультфильм'),
+           (4, 'Триллер'),
+           (5, 'Документальный'),
+           (6, 'Боевик');
 
 -- INSERT INTO USERS(EMAIL, LOGIN, NAME, BIRTHDAY)
 -- VALUES ('test1@mail.ru', 'JohnnyBoy1', 'John Filters1', '1996-03-31');
