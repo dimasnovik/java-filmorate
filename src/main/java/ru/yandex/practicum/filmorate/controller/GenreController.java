@@ -21,7 +21,7 @@ public class GenreController {
 
     @GetMapping
     public Collection<Genre> getAll() {
-        log.info(String.format("Получен GET запрос на адрес: %s", "/genres"));
+        log.info("Получен GET запрос на адрес: /genres");
         return genreService.getAll();
     }
 

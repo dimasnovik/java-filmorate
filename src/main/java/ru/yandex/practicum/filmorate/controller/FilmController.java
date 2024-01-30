@@ -67,7 +67,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) int count) {
+    public Collection<Film> getPopular(@Positive @RequestParam(defaultValue = "10") int count) {
         log.info("Получен GET запрос на адрес: /films/popular");
         return filmService.getTopFilms(count);
     }

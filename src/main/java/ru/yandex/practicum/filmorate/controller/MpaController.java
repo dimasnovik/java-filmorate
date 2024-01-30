@@ -21,7 +21,7 @@ public class MpaController {
 
     @GetMapping
     public Collection<Mpa> getAll() {
-        log.info(String.format("Получен GET запрос на адрес: %s", "/mpa"));
+        log.info("Получен GET запрос на адрес: /mpa");
         return mpaService.getAll();
     }
 
