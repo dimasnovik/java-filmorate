@@ -81,6 +81,6 @@ public class FilmService {
 
     public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
         directorStorage.getById(directorId);
-        return filmStorage.getFilmsOfDirector(directorId,sortBy);
+        return filmStorage.getFilmsOfDirector(directorId, sortBy);
     }
 }

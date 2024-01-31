@@ -83,9 +83,9 @@ public class FilmController {
     public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
                                                @RequestParam(defaultValue = "likes") String sortBy) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films/director", directorId));
-        if (!sortBy.equals("likes")&&!sortBy.equals("year")){
+        if (!sortBy.equals("likes") && !sortBy.equals("year")) {
             throw new InvalidValueException("Недопустимое значение параметра запроса SortBy, должен быть likes или year");
         }
-        return filmService.getFilmsOfDirector(directorId,sortBy);
+        return filmService.getFilmsOfDirector(directorId, sortBy);
     }
 }

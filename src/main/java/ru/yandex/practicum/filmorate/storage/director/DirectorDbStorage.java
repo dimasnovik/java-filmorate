@@ -44,7 +44,7 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public void remove(int id) {
         validateId(id);
-        jdbcTemplate.update("delete from DIRECTORS where DIRECTOR_ID = ?",id);
+        jdbcTemplate.update("delete from DIRECTORS where DIRECTOR_ID = ?", id);
     }
 
 
