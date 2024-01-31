@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
 public class Film {
@@ -30,4 +30,6 @@ public class Film {
     private int rate;
     @NotNull
     private final Mpa mpa;
+
+    private List<Director> directors = new ArrayList<>();
 }

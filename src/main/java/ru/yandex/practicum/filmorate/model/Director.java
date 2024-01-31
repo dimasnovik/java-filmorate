@@ -11,5 +11,5 @@ public class Director {
     private int id;
 
     @NotBlank
-    private final String name;
+    private String name;
 }

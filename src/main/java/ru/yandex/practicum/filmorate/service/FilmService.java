@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -20,6 +21,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
     private static final LocalDate FIRST_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     public Film create(Film film) {
@@ -68,5 +70,10 @@ public class FilmService {
             log.warn("Дата релиза не может быть раньше 28 декабря 1895 года");
             throw new InvalidValueException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
+    }
+
+    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
+        directorStorage.getById(directorId);
+        return filmStorage.getFilmsOfDirector(directorId,sortBy);
     }
 }

@@ -33,7 +33,7 @@ create table IF NOT EXISTS FILMS
     DURATION     INTEGER               not null,
     MPA_ID       INTEGER               not null,
     LIKES_COUNT  INTEGER default 0,
-    DIRECTOR_ID  INTEGER               not null,
+    DIRECTOR_ID  INTEGER,
     constraint FILMS_PK
         primary key (FILM_ID),
     constraint FILMS_MPA_FK

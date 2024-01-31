@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -68,4 +69,15 @@ public class FilmController {
         log.info("Получен GET запрос на адрес: /films/popular");
         return filmService.getTopFilms(count);
     }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
+                                               @RequestParam(defaultValue = "likes") String sortBy) {
+        log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films/director", directorId));
+        if (!sortBy.equals("likes")&&!sortBy.equals("year")){
+            throw new InvalidValueException("Недопустимое значение параметра запроса SortBy, должен быть likes или year");
+        }
+        return filmService.getFilmsOfDirector(directorId,sortBy);
+    }
+
 }
