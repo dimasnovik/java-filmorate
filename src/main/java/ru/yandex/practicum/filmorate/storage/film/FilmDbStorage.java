@@ -125,6 +125,26 @@ public class FilmDbStorage implements FilmStorage {
                 ((rs, rowNum) -> rs.getInt("USER_ID")), id);
     }
 
+    @Override
+    public Collection<Film> getCommonPopularFilms(int userId, int friendId, int count) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "select f.film_id, film_name, release_date, description, duration, f.mpa_id, mpa_name, fg.genre_id, genre_name " +
+                            "from films_genres fg " +
+                            "right join films f on f.film_id = fg.film_id " +
+                            "left join genres g on g.genre_id = fg.genre_id " +
+                            "join MPA on f.MPA_ID = MPA.MPA_ID " +
+                            "left join FILMS_LIKES fl1 on f.film_id = fl1.film_id and fl1.USER_ID = ? " +
+                            "left join FILMS_LIKES fl2 on f.film_id = fl2.film_id and fl2.USER_ID = ? " +
+                            "where fl1.film_id is not null and fl2.film_id is not null " +
+                            "order by f.LIKES_COUNT desc, f.FILM_ID " +
+                            "limit ?;", filmsRowMapper(), userId, friendId, count);
+        } catch (EmptyResultDataAccessException e) {
+            log.info(e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     private RowMapper<List<Film>> filmsRowMapper() {
         return (rs, rowNum) -> {
             List<Film> films = new ArrayList<>();
