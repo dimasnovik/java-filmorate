@@ -137,38 +137,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
-        String sortKey;
-        if (sortBy.equals("likes")) {
-            sortKey = "LIKES_COUNT";
-        } else {
-            sortKey = "YEAR(release_date)";
-        }
+    public Collection<Film> getCommonPopularFilms(int userId, int friendId, int count) {
         try {
             return jdbcTemplate.queryForObject(
-                    "select f.film_id, film_name, release_date, description," +
-                            " duration, f.mpa_id, mpa_name, d.DIRECTOR_ID as DIRECTOR_ID, d.DIRECTOR_NAME as DIRECTOR_NAME," +
-                            " fg.genre_id, genre_name " +
+                    "select f.film_id, film_name, release_date, description, duration, f.mpa_id, mpa_name, " +
+                            "d.DIRECTOR_ID as DIRECTOR_ID, d.DIRECTOR_NAME as DIRECTOR_NAME, fg.genre_id, genre_name " +
                             "from films_genres fg " +
                             "right join films f on f.film_id = fg.film_id " +
                             "left join genres g on g.genre_id = fg.genre_id " +
                             "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
-                            "join MPA on f.MPA_ID = MPA.MPA_ID " +
-                            "where d.DIRECTOR_ID = ? " +
-                            "order by " + sortKey + ";", filmsRowMapper(),directorId);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
-    public Collection<Film> getCommonPopularFilms(int userId, int friendId, int count) {
-        try {
-            return jdbcTemplate.queryForObject(
-                    "select f.film_id, film_name, release_date, description, duration, f.mpa_id, mpa_name, fg.genre_id, genre_name " +
-                            "from films_genres fg " +
-                            "right join films f on f.film_id = fg.film_id " +
-                            "left join genres g on g.genre_id = fg.genre_id " +
                             "join MPA on f.MPA_ID = MPA.MPA_ID " +
                             "left join FILMS_LIKES fl1 on f.film_id = fl1.film_id and fl1.USER_ID = ? " +
                             "left join FILMS_LIKES fl2 on f.film_id = fl2.film_id and fl2.USER_ID = ? " +
@@ -200,7 +177,7 @@ public class FilmDbStorage implements FilmStorage {
                             "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
                             "join MPA on f.MPA_ID = MPA.MPA_ID " +
                             "where d.DIRECTOR_ID = ? " +
-                            "order by " + sortKey + ";", filmsRowMapper(),directorId);
+                            "order by " + sortKey + ";", filmsRowMapper(), directorId);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
@@ -230,19 +207,21 @@ public class FilmDbStorage implements FilmStorage {
             return films;
         };
     }
+
     private void addDirectorToFilm(Film film) {
         if (!film.getDirectors().isEmpty()) {
             int directorId = film.getDirectors().get(0).getId();
-            jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?",directorId,film.getId());
+            jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?", directorId, film.getId());
             String directorName = jdbcTemplate.queryForObject("select DIRECTOR_NAME from DIRECTORS where DIRECTOR_ID = ?;",
                     (rs, rowNum) -> rs.getString("DIRECTOR_NAME"), directorId);
             film.getDirectors().get(0).setName(directorName);
-            log.info("В информацию о фильме с id = {} добавлен режиссер с id = {}",film.getId(),directorId);
+            log.info("В информацию о фильме с id = {} добавлен режиссер с id = {}", film.getId(), directorId);
         } else {
-            jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?",null,film.getId());
+            jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?", null, film.getId());
         }
 
     }
+
     private void validateId(int id) {
         Integer count = jdbcTemplate.queryForObject("select count(*) from FILMS where FILM_ID = ?", Integer.class, id);
         if (count == 0) {
