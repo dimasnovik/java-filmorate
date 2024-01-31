@@ -65,6 +65,13 @@ public class FilmService {
         return filmStorage.getLikes(id);
     }
 
+    public Collection<Film> getCommonPopularFilms(int userId, int friendId, int count) {
+        userStorage.getById(userId);
+        userStorage.getById(friendId);
+
+        return filmStorage.getCommonPopularFilms(userId, friendId, count);
+    }
+
     private void checkReleaseDate(Film film) {
         if (film.getReleaseDate().isBefore(FIRST_FILM_DATE)) {
             log.warn("Дата релиза не может быть раньше 28 декабря 1895 года");

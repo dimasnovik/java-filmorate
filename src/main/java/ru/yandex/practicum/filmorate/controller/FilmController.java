@@ -70,6 +70,15 @@ public class FilmController {
         return filmService.getTopFilms(count);
     }
 
+    @GetMapping("/common")
+    public Collection<Film> getCommonPopularFilms(
+            @Positive @RequestParam("userId") int userId,
+            @Positive @RequestParam("friendId") int friendId,
+            @Positive @RequestParam(defaultValue = "10") int count) {
+        log.info(String.format("Получен GET запрос на адрес: /films/common?userId=%d&friendId=%d", userId, friendId));
+        return filmService.getCommonPopularFilms(userId, friendId, count);
+    }
+
     @GetMapping("/director/{directorId}")
     public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
                                                @RequestParam(defaultValue = "likes") String sortBy) {
