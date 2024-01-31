@@ -140,6 +140,7 @@ public class FilmDbStorage implements FilmStorage {
     public Collection<Film> getCommonPopularFilms(int userId, int friendId, int count) {
         try {
             return jdbcTemplate.queryForObject(
+
                     "select f.film_id, film_name, release_date, description, duration, f.mpa_id, mpa_name, " +
                             "d.DIRECTOR_ID as DIRECTOR_ID, d.DIRECTOR_NAME as DIRECTOR_NAME, fg.genre_id, genre_name " +
                             "from films_genres fg " +
@@ -182,6 +183,7 @@ public class FilmDbStorage implements FilmStorage {
             return new ArrayList<>();
         }
     }
+
 
     private RowMapper<List<Film>> filmsRowMapper() {
         return (rs, rowNum) -> {
