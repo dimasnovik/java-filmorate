@@ -181,6 +181,31 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    @Override
+    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
+        String sortKey;
+        if (sortBy.equals("likes")) {
+            sortKey = "LIKES_COUNT";
+        } else {
+            sortKey = "YEAR(release_date)";
+        }
+        try {
+            return jdbcTemplate.queryForObject(
+                    "select f.film_id, film_name, release_date, description," +
+                            " duration, f.mpa_id, mpa_name, d.DIRECTOR_ID as DIRECTOR_ID, d.DIRECTOR_NAME as DIRECTOR_NAME," +
+                            " fg.genre_id, genre_name " +
+                            "from films_genres fg " +
+                            "right join films f on f.film_id = fg.film_id " +
+                            "left join genres g on g.genre_id = fg.genre_id " +
+                            "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
+                            "join MPA on f.MPA_ID = MPA.MPA_ID " +
+                            "where d.DIRECTOR_ID = ? " +
+                            "order by " + sortKey + ";", filmsRowMapper(),directorId);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
+
     private RowMapper<List<Film>> filmsRowMapper() {
         return (rs, rowNum) -> {
             List<Film> films = new ArrayList<>();
