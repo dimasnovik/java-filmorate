@@ -21,6 +21,9 @@ public interface FilmStorage {
 
     Collection<Integer> getLikes(int id);
 
+
+    Collection<Film> getFilmsOfDirector(int directorId, String sortBy);
+
     Collection<Film> getCommonPopularFilms(int userId, int friendId, int count);
 
 }

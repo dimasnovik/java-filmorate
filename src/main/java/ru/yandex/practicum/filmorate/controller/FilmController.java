@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -15,14 +17,10 @@ import java.util.Collection;
 @RequestMapping("/films")
 @Slf4j
 @Validated
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmController {
 
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @GetMapping
     public Collection<Film> getAll() {
@@ -79,5 +77,15 @@ public class FilmController {
             @Positive @RequestParam(defaultValue = "10") int count) {
         log.info(String.format("Получен GET запрос на адрес: /films/common?userId=%d&friendId=%d", userId, friendId));
         return filmService.getCommonPopularFilms(userId, friendId, count);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
+                                               @RequestParam(defaultValue = "likes") String sortBy) {
+        log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films/director", directorId));
+        if (!sortBy.equals("likes") && !sortBy.equals("year")) {
+            throw new InvalidValueException("Недопустимое значение параметра запроса SortBy, должен быть likes или year");
+        }
+        return filmService.getFilmsOfDirector(directorId, sortBy);
     }
 }
