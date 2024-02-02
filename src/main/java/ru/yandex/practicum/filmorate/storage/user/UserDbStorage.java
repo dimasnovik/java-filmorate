@@ -10,8 +10,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +109,34 @@ public class UserDbStorage implements UserStorage {
 
     }
 
+    @Override
+    public Collection<Film> getRecommend(int id) {
+        List<Integer> likes = jdbcTemplate.query("SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ?",
+                ((rs, rowNum) -> rs.getInt("FILM_ID")), id);
+        if (likes.size() == 0) {
+            return new ArrayList<>();
+        }
+        String sqlForSearchUser = "SELECT USER_ID, COUNT(FILM_ID) AS SUMS  FROM FILMS_LIKES fl WHERE " +
+                "(FILM_ID IN (SELECT FILM_ID FROM FILMS_LIKES fl2 WHERE USER_ID = ?) AND USER_ID <> ?)" +
+                "GROUP BY USER_ID ORDER BY SUMS DESC LIMIT 1";
+        Integer idUserWithSomeLikes;
+        List<Film> films;
+        try {
+            idUserWithSomeLikes = jdbcTemplate.queryForObject(sqlForSearchUser, (rs, rowNum) ->
+                    Integer.valueOf(rs.getInt("USER_ID")), id, id);
+            String sqlForSearchRecommend = "SELECT f.FILM_ID, f.FILM_NAME, f.RELEASE_DATE, f.DESCRIPTION, f.DURATION, f.MPA_ID, " +
+                    "m.MPA_NAME, fg.GENRE_ID, g.GENRE_NAME FROM FILMS_GENRES fg " +
+                    "RIGHT JOIN FILMS f ON f.FILM_ID = fg.FILM_ID " +
+                    "LEFT JOIN GENRES g ON g.GENRE_ID = fg.GENRE_ID " +
+                    "JOIN MPA m ON f.MPA_ID = m.MPA_ID WHERE f.FILM_ID IN (SELECT FILM_ID FROM FILMS_LIKES fl " +
+                    "WHERE (USER_ID = ? AND FILM_ID NOT IN (SELECT FILM_ID FROM FILMS_LIKES fl2 WHERE USER_ID = ?)))" +
+                    "ORDER BY f.FILM_ID";
+            films = jdbcTemplate.queryForObject(sqlForSearchRecommend, filmsRowMapper(), idUserWithSomeLikes, id);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+        return films;
+    }
 
     private RowMapper<User> userRowMapper() {
         return (rs, rowNum) -> {
@@ -113,6 +145,30 @@ public class UserDbStorage implements UserStorage {
             user.setName(rs.getString("NAME"));
             user.setId(rs.getInt("USER_ID"));
             return user;
+        };
+    }
+
+    private RowMapper<List<Film>> filmsRowMapper() {
+        return (rs, rowNum) -> {
+            List<Film> films = new ArrayList<>();
+            while (!rs.isAfterLast()) {
+                int filmId = rs.getInt("FILM_ID");
+                Film film = new Film(rs.getString("FILM_NAME"), rs.getString("DESCRIPTION"),
+                        rs.getDate("RELEASE_DATE").toLocalDate(), rs.getInt("DURATION"),
+                        new Mpa(rs.getInt("MPA_ID"), rs.getString("MPA_NAME")));
+                film.setId(filmId);
+
+                do {
+                    if (rs.getString("GENRE_NAME") != null) {
+                        Genre genre = new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME"));
+                        film.getGenres().add(genre);
+                    }
+
+                } while (rs.next() && filmId == rs.getInt("FILM_ID"));
+
+                films.add(film);
+            }
+            return films;
         };
     }
 }

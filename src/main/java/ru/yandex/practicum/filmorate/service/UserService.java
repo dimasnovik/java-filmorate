@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -49,6 +50,10 @@ public class UserService {
 
     public Collection<User> getCommonFriends(int id1, int id2) {
         return storage.getCommonFriends(id1, id2);
+    }
+
+    public Collection<Film> getReccomend(int id) {
+        return storage.getRecommend(id);
     }
 
     private void setNameIfBlank(User user) {
