@@ -110,20 +110,39 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getPopular(int count) {
+    public Collection<Film> getPopular(int count, Integer genreId, Integer year) {
         try {
+            if (genreId != null && year != null) {
+                return jdbcTemplate.queryForObject(
+                        "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                                "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
+                                "left join genres g on fg.genre_id = g.genre_id where f.film_id in " +
+                                "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id " +
+                                "left join genres g on fg.genre_id = g.genre_id where g.genre_id = ?) and extract(year from f.release_date) = ? " +
+                                "order by f.likes_count desc limit ?", filmsRowMapper(), genreId, year, count);
+            }
+            if (genreId != null) {
+                return jdbcTemplate.queryForObject(
+                        "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                                "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
+                                "left join genres g on fg.genre_id = g.genre_id where f.film_id in " +
+                                "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id " +
+                                "left join genres g on fg.genre_id = g.genre_id where g.genre_id = ?) " +
+                                "order by f.likes_count desc limit ?", filmsRowMapper(), genreId, count);
+            }
+            if (year != null) {
+                return jdbcTemplate.queryForObject(
+                        "select f.*, m.*, d.*, fg.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                                "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
+                                "left join genres g on fg.genre_id = g.genre_id where extract(year from f.release_date) = ? " +
+                                "order by f.likes_count desc limit ?", filmsRowMapper(), year, count);
+            }
             return jdbcTemplate.queryForObject(
-                    "select f.film_id, film_name, release_date, description," +
-                            " duration, f.mpa_id, mpa_name, d.DIRECTOR_ID as DIRECTOR_ID, d.DIRECTOR_NAME as DIRECTOR_NAME," +
-                            "  fg.genre_id, genre_name " +
-                            "from films_genres fg " +
-                            "right join films f on f.film_id = fg.film_id " +
-                            "left join genres g on g.genre_id = fg.genre_id " +
-                            "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
-                            "join MPA on f.MPA_ID = MPA.MPA_ID " +
-                            "left join FILMS_LIKES fl on f.film_id = fl.film_id " +
-                            "order by f.LIKES_COUNT desc,f.FILM_ID " +
-                            "limit ?;", filmsRowMapper(), count);
+                    "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                            "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
+                            "left join genres g on fg.genre_id = g.genre_id " +
+                            "order by f.likes_count desc limit ?", filmsRowMapper(), count);
+
         } catch (EmptyResultDataAccessException e) {
             log.info(e.getMessage());
             return new ArrayList<>();
@@ -183,7 +202,6 @@ public class FilmDbStorage implements FilmStorage {
             return new ArrayList<>();
         }
     }
-
 
     private RowMapper<List<Film>> filmsRowMapper() {
         return (rs, rowNum) -> {
