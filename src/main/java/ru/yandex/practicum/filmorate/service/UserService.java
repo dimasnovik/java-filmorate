@@ -52,7 +52,7 @@ public class UserService {
         return storage.getCommonFriends(id1, id2);
     }
 
-    public Collection<Film> getReccomend(int id) {
+    public Collection<Film> getRecommend(int id) {
         return storage.getRecommend(id);
     }
 

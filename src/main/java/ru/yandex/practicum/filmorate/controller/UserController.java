@@ -69,6 +69,6 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public Collection<Film> getRecommend(@PathVariable("id") Integer id) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d/recommendations", "/users", id));
-        return userService.getReccomend(id);
+        return userService.getRecommend(id);
     }
 }
