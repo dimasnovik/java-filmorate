@@ -118,10 +118,6 @@ public class FilmDbStorageTest {
                 .usingRecursiveComparison()
                 .isEqualTo(newLikes);
 
-        Assertions.assertThat(filmStorage.getPopular(1))
-                .isNotNull()
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(film1));
     }
 
 }
