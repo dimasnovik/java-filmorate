@@ -179,6 +179,34 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> searchFilms(String query, String by) {
+        StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("select f.film_id, film_name, release_date, description," +
+                " duration, f.mpa_id, mpa_name, d.DIRECTOR_ID as DIRECTOR_ID, d.DIRECTOR_NAME as DIRECTOR_NAME," +
+                " fg.genre_id, genre_name " +
+                "from films_genres fg " +
+                "right join films f on f.film_id = fg.film_id " +
+                "left join genres g on g.genre_id = fg.genre_id " +
+                "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
+                "join MPA on f.MPA_ID = MPA.MPA_ID ");
+        if (by.equals("director")) {
+            sqlQuery.append("where lower(DIRECTOR_NAME) like lower('%").append(query).append("%') ");
+        } else if (by.equals("title")) {
+            sqlQuery.append("where lower(FILM_NAME) like lower('%").append(query).append("%') ");
+        } else {
+            sqlQuery.append("where lower(FILM_NAME) like lower('%").append(query).append("%') ")
+                    .append("or lower(DIRECTOR_NAME) like lower('%").append(query).append("%') ");
+        }
+        sqlQuery.append("order by LIKES_COUNT desc;");
+        try {
+            return jdbcTemplate.queryForObject(sqlQuery.toString(), filmsRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            log.info(e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
     public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
         String sortKey;
         if (sortBy.equals("likes")) {
