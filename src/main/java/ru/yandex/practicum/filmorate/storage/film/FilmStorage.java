@@ -25,4 +25,5 @@ public interface FilmStorage {
 
     Collection<Film> getCommonPopularFilms(int userId, int friendId, int count);
 
+    Collection<Film> searchFilms(String query, String by);
 }
