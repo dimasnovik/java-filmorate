@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
 
@@ -86,6 +87,15 @@ public class FilmController {
         log.info(String.format("Получен GET запрос на адрес: /films/common?userId=%d&friendId=%d", userId, friendId));
         return filmService.getCommonPopularFilms(userId, friendId, count);
     }
+
+    @GetMapping("/search")
+    public Collection<Film> searchFilms(@NotBlank @RequestParam("query") String query, @RequestParam("by") String by) {
+        if (!by.equals("director") && !by.equals("title") && !by.equals("title,director") && !by.equals("director,title")) {
+            throw new InvalidValueException("Недопустимое значение параметра запроса by, должен быть director/title/director,title");
+        }
+        return filmService.searchFilms(query, by);
+    }
+
 
     @GetMapping("/director/{directorId}")
     public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
