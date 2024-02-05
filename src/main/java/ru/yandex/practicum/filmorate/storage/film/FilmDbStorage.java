@@ -65,6 +65,22 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteById(int id) {
+
+        validateId(id);//getbyid
+        log.info(String.format("Удаляется фильм с id = %d", id));
+
+        jdbcTemplate.update("delete from FILMS_LIKES where FILM_ID = ?", id);
+        log.info(String.format("Удалены лайки для фильма с id = %d", id));
+
+        jdbcTemplate.update("delete from FILMS_GENRES where FILM_ID = ?", id);
+        log.info(String.format("Удалены жанры для фильма с id = %d", id));
+
+        jdbcTemplate.update("delete from FILMS where FILM_ID = ?", id);
+        log.info(String.format("Фильм с id = %d успешно удален", id));
+    }
+
+    @Override
     public Film getById(int id) {
         validateId(id);
         return jdbcTemplate.queryForObject(
@@ -76,7 +92,7 @@ public class FilmDbStorage implements FilmStorage {
                         "left join genres g on g.genre_id = fg.genre_id " +
                         "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
                         "join MPA on f.MPA_ID = MPA.MPA_ID " +
-                        "where f.film_id = ?" +
+                        "where f.film_id = ? " +
                         "order by f.FILM_ID;", filmsRowMapper(), id).get(0);
     }
 

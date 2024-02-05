@@ -26,6 +26,11 @@ public class UserService {
         return storage.update(user);
     }
 
+    public void deleteById(int id) {
+        storage.deleteById(id);
+        log.info(String.format("Пользователь с id = %d удален", id));
+    }
+
     public Collection<User> getAll() {
         return storage.getAll();
     }

@@ -36,6 +36,12 @@ public class UserController {
         return userService.update(user);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable("id") Integer id) {
+        log.info(String.format("Получен DELETE запрос на адрес: %s/%d", "/users", id));
+        userService.deleteById(id);
+    }
+
     @GetMapping("/{id}")
     public User getById(@PathVariable("id") Integer id) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d", "/users", id));

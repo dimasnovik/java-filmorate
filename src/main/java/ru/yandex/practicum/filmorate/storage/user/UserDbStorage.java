@@ -63,6 +63,15 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void deleteById(int id) {
+        jdbcTemplate.update("delete from USERS where USER_ID = ?", id);
+        jdbcTemplate.update("delete from FRIENDS where USER1_ID = ? or USER2_ID = ?", id, id);
+        jdbcTemplate.update("delete from FILMS_LIKES where USER_ID = ?", id);
+
+        log.info(String.format("Пользователь с id = %d удален", id));
+    }
+
+    @Override
     public User getById(int id) {
         try {
             return jdbcTemplate.queryForObject("select * from USERS where USER_ID = ?", userRowMapper(), id);
