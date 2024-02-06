@@ -1,4 +1,4 @@
-DROP table if exists GENRES,DIRECTORS,MPA,FILMS,FILMS_GENRES,USERS,FILMS_LIKES,FRIENDS;
+DROP table if exists GENRES,DIRECTORS,MPA,FILMS,FILMS_GENRES,FILMS_LIKES,FRIENDS,USERS;
 
 create table IF NOT EXISTS GENRES
 (
@@ -87,8 +87,7 @@ create table IF NOT EXISTS FILMS_GENRES
      constraint FILMS_GENRES_PK
          primary key (FILM_ID, GENRE_ID),
      constraint FILMS_GENRES_FILMS_FK
--        foreign key (FILM_ID) references FILMS,
-+        foreign key (FILM_ID) references FILMS on delete cascade,
+        foreign key (FILM_ID) references FILMS on delete cascade,
      constraint FILMS_GENRES_GENRES_FK
          foreign key (GENRE_ID) references GENRES
  );
