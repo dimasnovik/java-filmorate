@@ -65,9 +65,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteById(int id) {
         jdbcTemplate.update("delete from USERS where USER_ID = ?", id);
-        jdbcTemplate.update("delete from FRIENDS where USER1_ID = ? or USER2_ID = ?", id, id);
-        jdbcTemplate.update("delete from FILMS_LIKES where USER_ID = ?", id);
-
         log.info(String.format("Пользователь с id = %d удален", id));
     }
 
@@ -122,7 +119,7 @@ public class UserDbStorage implements UserStorage {
     public Collection<Film> getRecommend(int id) {
         List<Integer> likes = jdbcTemplate.query("SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ?",
                 ((rs, rowNum) -> rs.getInt("FILM_ID")), id);
-        if (likes.size() == 0) {
+        if (likes.isEmpty()) {
             return new ArrayList<>();
         }
         String sqlForSearchUser = "SELECT USER_ID, COUNT(FILM_ID) AS SUMS  FROM FILMS_LIKES fl WHERE " +
@@ -132,7 +129,7 @@ public class UserDbStorage implements UserStorage {
         List<Film> films;
         try {
             idUserWithSomeLikes = jdbcTemplate.queryForObject(sqlForSearchUser, (rs, rowNum) ->
-                    Integer.valueOf(rs.getInt("USER_ID")), id, id);
+                    rs.getInt("USER_ID"), id, id);
             String sqlForSearchRecommend = "SELECT f.FILM_ID, f.FILM_NAME, f.RELEASE_DATE, f.DESCRIPTION, f.DURATION, f.MPA_ID, " +
                     "m.MPA_NAME, fg.GENRE_ID, g.GENRE_NAME FROM FILMS_GENRES fg " +
                     "RIGHT JOIN FILMS f ON f.FILM_ID = fg.FILM_ID " +

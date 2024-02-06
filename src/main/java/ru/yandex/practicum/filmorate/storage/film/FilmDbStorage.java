@@ -67,7 +67,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteById(int id) {
-
         validateId(id);
         log.info(String.format("Удаляется фильм с id = %d", id));
 
