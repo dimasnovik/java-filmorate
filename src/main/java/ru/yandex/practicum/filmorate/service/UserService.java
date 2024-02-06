@@ -27,6 +27,7 @@ public class UserService {
     }
 
     public void deleteById(int id) {
+        storage.getById(id);
         storage.deleteById(id);
         log.info(String.format("Пользователь с id = %d удален", id));
     }
@@ -50,6 +51,7 @@ public class UserService {
     }
 
     public Collection<User> getFriendsOfUser(Integer userId) {
+        getById(userId);
         return storage.getFriends(userId);
     }
 

@@ -84,12 +84,13 @@ create table IF NOT EXISTS FILMS_GENRES
 (
     FILM_ID  INTEGER NOT NULL,
     GENRE_ID INTEGER NOT NULL,
-    constraint FILMS_GENRES_PK
-        primary key (FILM_ID, GENRE_ID),
-    constraint FILMS_GENRES_FILMS_FK
-        foreign key (FILM_ID) references FILMS on delete cascade,
-    constraint FILMS_GENRES_GENRES_FK
-        foreign key (GENRE_ID) references GENRES
-);
+     constraint FILMS_GENRES_PK
+         primary key (FILM_ID, GENRE_ID),
+     constraint FILMS_GENRES_FILMS_FK
+-        foreign key (FILM_ID) references FILMS,
++        foreign key (FILM_ID) references FILMS on delete cascade,
+     constraint FILMS_GENRES_GENRES_FK
+         foreign key (GENRE_ID) references GENRES
+ );
 
 

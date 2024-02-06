@@ -67,17 +67,12 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteById(int id) {
 
-        validateId(id);//getbyid
+        validateId(id);
         log.info(String.format("Удаляется фильм с id = %d", id));
-
-        jdbcTemplate.update("delete from FILMS_LIKES where FILM_ID = ?", id);
-        log.info(String.format("Удалены лайки для фильма с id = %d", id));
-
-        jdbcTemplate.update("delete from FILMS_GENRES where FILM_ID = ?", id);
-        log.info(String.format("Удалены жанры для фильма с id = %d", id));
 
         jdbcTemplate.update("delete from FILMS where FILM_ID = ?", id);
         log.info(String.format("Фильм с id = %d успешно удален", id));
+
     }
 
     @Override
