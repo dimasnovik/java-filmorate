@@ -1,13 +1,15 @@
-package ru.yandex.practicum.filmorate.storage.feed;
+package ru.yandex.practicum.filmorate.storage.review;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
 import ru.yandex.practicum.filmorate.exception.NoSuchReviewException;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
@@ -17,8 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Component
@@ -28,7 +29,7 @@ public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Review> getReviews() {
+    public Collection<Review> getReviews() {
         String sql = "SELECT * FROM reviews";
         List<Review> reviews = new ArrayList<>();
 
@@ -42,6 +43,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review addReview(Review review) {
+        validateReview(review);
         assertFilmExists(review.getFilmId());
         assertUserExists(review.getUserId());
 
@@ -57,6 +59,7 @@ public class ReviewDbStorage implements ReviewStorage {
             return ps;
         }, keyHolder);
 
+        review.setReviewId(keyHolder.getKey().intValue());
         return getReviewById(keyHolder.getKey().intValue());
     }
 
@@ -66,12 +69,15 @@ public class ReviewDbStorage implements ReviewStorage {
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> rsToReview(rs), reviewId);
         } catch (EmptyResultDataAccessException e) {
-            throw new NoSuchReviewException("film was not found");
+            throw new NoSuchReviewException("review was not found");
         }
     }
 
     @Override
     public Review update(Review review) {
+        if (review.getFilmId() <= 0 || review.getUserId() <= 0) {
+            throw new InvalidValueException("value <= 0");
+        }
         assertFilmExists(review.getFilmId());
         assertUserExists(review.getUserId());
 
@@ -90,18 +96,81 @@ public class ReviewDbStorage implements ReviewStorage {
     public void addOpinionToReview(int reviewId, int userId, boolean isLike) {
         assertFilmExists(reviewId);
         assertUserExists(userId);
-        String sql = "INSERT INTO review_opinion (review_id, user_id, is_like) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, reviewId, userId, isLike);
+        try {
+            String sql = "INSERT INTO review_opinion (review_id, user_id, is_like) VALUES (?, ?, ?)";
+            jdbcTemplate.update(sql, reviewId, userId, isLike);
+        } catch (DuplicateKeyException e) {
+            throw new NoSuchReviewException("review error: review already have like/dislike");
+        }
+    }
+
+    @Override
+    public Collection<Review> getReviewsByFilmId(int filmId) {
+        String sql = "SELECT * FROM reviews WHERE film_id = ?";
+        List<Review> reviews = new ArrayList<>();
+
+        jdbcTemplate.query(sql, (resultSet, i) -> {
+            reviews.add(rsToReview(resultSet));
+            return rsToReview(resultSet);
+        }, filmId);
+
+        return reviews;
+    }
+
+    @Override
+    public void removeReview(int reviewId) {
+        String sql;
+        Review review = getReviewById(reviewId);
+
+        if (review != null) {
+            sql = "DELETE FROM reviews WHERE review_id = ?";
+            jdbcTemplate.update(sql, reviewId);
+        } else {
+            throw new RuntimeException("Ошибка при удалении отзыва.");
+        }
     }
 
     private Review rsToReview(ResultSet rs) throws SQLException {
-        return Review.builder()
-                .reviewId(rs.getInt("review_id"))
-                .content(rs.getString("content"))
-                .isPositive(rs.getBoolean("is_positive"))
-                .filmId(rs.getInt("film_id"))
-                .userId(rs.getInt("user_id"))
-                .build();
+        Integer useful;
+        Review review = new Review(rs.getInt("review_id"),
+                rs.getString("content"),
+                rs.getBoolean("is_positive"),
+                rs.getInt("film_id"),
+                rs.getInt("user_id"),
+                0);
+
+        String sql = "SELECT COUNT(review_id) FILTER (WHERE is_like = true) - COUNT(review_id) FILTER (WHERE is_like = false) " +
+                "FROM review_opinion " +
+                "WHERE review_id = ?;";
+
+        useful = jdbcTemplate.queryForObject(sql, Integer.class, review.getReviewId());
+
+        if (useful != null) {
+            review.setUseful(useful);
+        } else {
+            throw new RuntimeException("Ошибка при расчете рейтинга отзыва.");
+        }
+        return review;
+    }
+
+    private void validateReview(Review review) {
+        if (review.getContent() == null) {
+            throw new InvalidValueException("review error: content is null");
+        }
+
+        if (review.getUserId() < 1) {
+            throw new NoSuchElementException("review error: user id < 1");
+        }
+
+
+        if (review.getFilmId() < 1) {
+            throw new NoSuchElementException("review error: film id < 1");
+        }
+
+
+        if (review.getIsPositive() == null) {
+            throw new InvalidValueException("review error: is_positive is null");
+        }
     }
 
     private void assertUserExists(int userId) {

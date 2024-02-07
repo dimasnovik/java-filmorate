@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.InvalidValueException;
-import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
-import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
-import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.*;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -44,5 +41,12 @@ public class ErrorHandler {
     public Map<String, String> handleOtherExceptions(final Throwable e) {
         log.debug("Получен статус 500 Internal server error {}", e.getMessage(), e);
         return Map.of("Непредвиденная ошибка", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNoSuchReviewException(final NoSuchReviewException e) {
+        log.debug("Получен статус 404 Not found {}", e.getMessage(), e);
+        return Map.of("Wrong ID", e.getMessage());
     }
 }

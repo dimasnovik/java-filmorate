@@ -3,16 +3,18 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
  import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.feed.ReviewStorage;
+import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewStorage reviewStorage;
 
-    public List<Review> getReviews() {
+    public Collection<Review> getReviews() {
         return reviewStorage.getReviews();
     }
 
@@ -28,7 +30,22 @@ public class ReviewService {
         return reviewStorage.update(review);
     }
 
+    public void removeReview (int reviewId) {
+        reviewStorage.removeReview(reviewId);
+    }
+
     public void addOpinionToReview(int reviewId, int userId, boolean isLike) {
         reviewStorage.addOpinionToReview(reviewId, userId, isLike);
+    }
+
+    public Collection<Review> getFilmReviewsSortedByUsefulness(int filmId, int count) {
+        if (count == 0) {
+            count = Integer.MAX_VALUE;
+        }
+
+        return reviewStorage.getReviewsByFilmId(filmId).stream()
+                .sorted(Comparator.comparing(Review::getUseful).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }
