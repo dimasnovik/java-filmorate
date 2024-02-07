@@ -30,7 +30,7 @@ public class ReviewService {
         return reviewStorage.update(review);
     }
 
-    public void removeReview (int reviewId) {
+    public void removeReview(int reviewId) {
         reviewStorage.removeReview(reviewId);
     }
 
