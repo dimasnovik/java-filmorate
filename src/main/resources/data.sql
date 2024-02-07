@@ -12,6 +12,16 @@ merge into GENRES (GENRE_ID, GENRE_NAME)
            (5, 'Документальный'),
            (6, 'Боевик');
 
+MERGE INTO event_type (event_type_id, name)
+    VALUES (1, 'LIKE'),
+    (2, 'REVIEW'),
+    (3, 'FRIEND');
+
+MERGE INTO operation_type (operation_type_id, name)
+    VALUES (1, 'REMOVE'),
+    (2, 'ADD'),
+    (3, 'UPDATE');
+
 -- INSERT INTO USERS(EMAIL, LOGIN, NAME, BIRTHDAY)
 -- VALUES ('test1@mail.ru', 'JohnnyBoy1', 'John Filters1', '1996-03-31');
 -- INSERT INTO USERS(EMAIL, LOGIN, NAME, BIRTHDAY)
