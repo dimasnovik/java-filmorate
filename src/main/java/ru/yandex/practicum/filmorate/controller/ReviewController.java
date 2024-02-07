@@ -21,7 +21,7 @@ public class ReviewController {
                                          @RequestParam(defaultValue = "0") int count) {
         log.info("review list requested. added.");
         if (filmId == null) {
-            return reviewService.getReviews();
+            return reviewService.getReviewsSortByUseful();
         }
         return reviewService.getFilmReviewsSortedByUsefulness(filmId, count);
     }
