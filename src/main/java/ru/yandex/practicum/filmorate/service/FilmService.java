@@ -38,6 +38,10 @@ public class FilmService {
         return film;
     }
 
+    public void deleteById(int id) {
+        filmStorage.deleteById(id);
+    }
+
     public Film getById(int id) {
         return filmStorage.getById(id);
     }

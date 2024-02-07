@@ -41,6 +41,12 @@ public class FilmController {
         return filmService.update(film);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteById(@Positive @PathVariable("id") int id) {
+        log.info(String.format("Получен DELETE запрос на адрес: %s/%d", "/films", id));
+        filmService.deleteById(id);
+    }
+
     @GetMapping("/{id}")
     public Film getById(@Positive @PathVariable("id") int id) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films", id));

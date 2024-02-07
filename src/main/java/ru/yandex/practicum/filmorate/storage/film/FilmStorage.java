@@ -9,6 +9,8 @@ public interface FilmStorage {
 
     Film update(Film film);
 
+    void deleteById(int id);
+
     Film getById(int id);
 
     Collection<Film> getAll();

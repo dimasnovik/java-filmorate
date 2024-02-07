@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Primary
@@ -65,6 +66,16 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteById(int id) {
+        validateId(id);
+        log.info(String.format("Удаляется фильм с id = %d", id));
+
+        jdbcTemplate.update("delete from FILMS where FILM_ID = ?", id);
+        log.info(String.format("Фильм с id = %d успешно удален", id));
+
+    }
+
+    @Override
     public Film getById(int id) {
         validateId(id);
         return jdbcTemplate.queryForObject(
@@ -76,7 +87,7 @@ public class FilmDbStorage implements FilmStorage {
                         "left join genres g on g.genre_id = fg.genre_id " +
                         "left join DIRECTORS d on f.DIRECTOR_ID = d.DIRECTOR_ID " +
                         "join MPA on f.MPA_ID = MPA.MPA_ID " +
-                        "where f.film_id = ?" +
+                        "where f.film_id = ? " +
                         "order by f.FILM_ID;", filmsRowMapper(), id).get(0);
     }
 
@@ -119,7 +130,7 @@ public class FilmDbStorage implements FilmStorage {
                                 "left join genres g on fg.genre_id = g.genre_id where f.film_id in " +
                                 "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id " +
                                 "left join genres g on fg.genre_id = g.genre_id where g.genre_id = ?) and extract(year from f.release_date) = ? " +
-                                "order by f.likes_count desc limit ?", filmsRowMapper(), genreId, year, count);
+                                "order by f.likes_count desc;", filmsRowMapper(), genreId, year).stream().limit(count).collect(Collectors.toList());
             }
             if (genreId != null) {
                 return jdbcTemplate.queryForObject(
@@ -128,20 +139,20 @@ public class FilmDbStorage implements FilmStorage {
                                 "left join genres g on fg.genre_id = g.genre_id where f.film_id in " +
                                 "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id " +
                                 "left join genres g on fg.genre_id = g.genre_id where g.genre_id = ?) " +
-                                "order by f.likes_count desc limit ?", filmsRowMapper(), genreId, count);
+                                "order by f.likes_count desc;", filmsRowMapper(), genreId).stream().limit(count).collect(Collectors.toList());
             }
             if (year != null) {
                 return jdbcTemplate.queryForObject(
                         "select f.*, m.*, d.*, fg.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
                                 "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
                                 "left join genres g on fg.genre_id = g.genre_id where extract(year from f.release_date) = ? " +
-                                "order by f.likes_count desc limit ?", filmsRowMapper(), year, count);
+                                "order by f.likes_count desc;", filmsRowMapper(), year).stream().limit(count).collect(Collectors.toList());
             }
             return jdbcTemplate.queryForObject(
                     "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
                             "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
                             "left join genres g on fg.genre_id = g.genre_id " +
-                            "order by f.likes_count desc limit ?", filmsRowMapper(), count);
+                            "order by f.likes_count desc;", filmsRowMapper()).stream().limit(count).collect(Collectors.toList());
 
         } catch (EmptyResultDataAccessException e) {
             log.info(e.getMessage());
