@@ -12,15 +12,17 @@ import javax.validation.constraints.Positive;
 @AllArgsConstructor
 public class Review {
     private int reviewId;
+
     @NotBlank(message = "Содержание отзыва не может быть пустым.")
     @NotNull(message = "Содержание отзыва не может быть равно null.")
     private final String content;
+
     @NotNull(message = "Оценка отзыва не может быть равна null.")
     private final Boolean isPositive;
-    @Positive(message = "Id фильма не может быть отрицательным")
+
     @NotNull(message = "Id фильма не может быть равен null.")
     private final Integer filmId;
-    @Positive(message = "Id пользователя не может быть отрицательным")
+
     @NotNull(message = "Id пользователя не может быть равен null.")
     private final Integer userId;
     private int useful;
