@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
- import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
 import java.util.Collection;
@@ -13,13 +15,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewStorage reviewStorage;
+    private final FeedService feedService;
 
     public Collection<Review> getReviews() {
         return reviewStorage.getReviews();
     }
 
     public Review addReview(Review review) {
-        return reviewStorage.addReview(review);
+        review = reviewStorage.addReview(review);
+        feedService.createFeed(review.getUserId(), EventType.REVIEW, EventOperation.ADD, review.getReviewId());
+        return review;
     }
 
     public Review getReviewById(long id) {
@@ -27,10 +32,14 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
-        return reviewStorage.update(review);
+        review = reviewStorage.update(review);
+        feedService.createFeed(review.getUserId(), EventType.REVIEW, EventOperation.UPDATE, review.getReviewId());
+        return review;
     }
 
     public void removeReview(int reviewId) {
+        Review review = getReviewById(reviewId);
+        feedService.createFeed(review.getUserId(), EventType.REVIEW, EventOperation.REMOVE, reviewId);
         reviewStorage.removeReview(reviewId);
     }
 
