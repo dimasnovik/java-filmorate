@@ -25,4 +25,5 @@ public interface UserStorage {
     Collection<User> getCommonFriends(int id1, int id2);
 
     Collection<Film> getRecommend(int id);
+
 }

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -22,6 +24,7 @@ public class FilmService {
     private final UserStorage userStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
+    private final FeedService feedService;
     private static final LocalDate FIRST_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     public Film create(Film film) {
@@ -53,12 +56,13 @@ public class FilmService {
     public void addLike(int filmId, int userId) {
         userStorage.getById(userId);
         filmStorage.addLike(filmId, userId);
+        feedService.createFeed(userId, EventType.LIKE, EventOperation.ADD, filmId);
     }
 
     public void removeLike(int filmId, int userId) {
         userStorage.getById(userId);
         filmStorage.removeLike(filmId, userId);
-
+        feedService.createFeed(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
     }
 
     public Collection<Film> getTopFilms(int count, Integer genreId, Integer year) {

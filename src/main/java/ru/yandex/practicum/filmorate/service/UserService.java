@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -15,6 +17,7 @@ import java.util.Collection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserService {
     private final UserStorage storage;
+    private final FeedService feedService;
 
     public User create(User user) {
         setNameIfBlank(user);
@@ -40,14 +43,16 @@ public class UserService {
         return storage.getById(id);
     }
 
-    public void addToFriends(int id1, int id2) {
-        storage.addFriend(id1, id2);
-        log.info(String.format("Пользователь с id = %d добавил пользователя с id = %d в друзья", id1, id2));
+    public void addToFriends(int userId, int friendId) {
+        storage.addFriend(userId, friendId);
+        log.info(String.format("Пользователь с id = %d добавил пользователя с id = %d в друзья", userId, friendId));
+        feedService.createFeed(userId, EventType.FRIEND, EventOperation.ADD, friendId);
     }
 
-    public void removeFromFriends(int id1, int id2) {
-        storage.removeFriend(id1, id2);
-        log.info(String.format("Пользователь с id = %d удалил пользователя с id = %d из друзей", id1, id2));
+    public void removeFromFriends(int userId, int friendId) {
+        storage.removeFriend(userId, friendId);
+        log.info(String.format("Пользователь с id = %d удалил пользователя с id = %d из друзей", userId, friendId));
+        feedService.createFeed(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
     }
 
     public Collection<User> getFriendsOfUser(Integer userId) {
