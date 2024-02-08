@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -111,10 +112,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(int filmId, int userId) {
-        int rowsAffected = jdbcTemplate.update("MERGE into FILMS_LIKES(FILM_ID, USER_ID) VALUES (?,?)", filmId, userId);
-        if (rowsAffected == 1) {
-            log.info("FFFFFFFFFFFF user {} puts like film {}",userId,filmId);
+        try {
+            jdbcTemplate.update("INSERT into FILMS_LIKES(FILM_ID, USER_ID) VALUES (?,?);", filmId, userId);
             jdbcTemplate.update("update FILMS set LIKES_COUNT = LIKES_COUNT + 1 where FILM_ID = ?;", filmId);
+        } catch (DataAccessException e) {
+            log.warn("user already put like to this film");
         }
     }
 
@@ -122,7 +124,6 @@ public class FilmDbStorage implements FilmStorage {
     public void removeLike(int filmId, int userId) {
         int rowsAffected = jdbcTemplate.update("delete from FILMS_LIKES where FILM_ID = ? and USER_ID = ?", filmId, userId);
         if (rowsAffected == 1) {
-            log.info(" FFFFFFFFFF user {} deletes like film {}",userId,filmId);
             jdbcTemplate.update("update FILMS set LIKES_COUNT = LIKES_COUNT - 1 where FILM_ID = ?;", filmId);
         }
     }
