@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
-import ru.yandex.practicum.filmorate.model.EventOperation;
-import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.feed.EventOperation;
+import ru.yandex.practicum.filmorate.model.feed.EventType;
+import ru.yandex.practicum.filmorate.storage.daoUtils.IDValidator;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -21,10 +22,9 @@ import java.util.Collection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
     private final GenreStorage genreStorage;
-    private final DirectorStorage directorStorage;
     private final FeedService feedService;
+    private final IDValidator validator;
     private static final LocalDate FIRST_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     public Film create(Film film) {
@@ -36,16 +36,19 @@ public class FilmService {
 
     public Film update(Film film) {
         checkReleaseDate(film);
+        validator.validateFilmId(film.getId());
         filmStorage.update(film);
         genreStorage.saveGenresOfFilm(film);
         return film;
     }
 
     public void deleteById(int id) {
+        validator.validateFilmId(id);
         filmStorage.deleteById(id);
     }
 
     public Film getById(int id) {
+        validator.validateFilmId(id);
         return filmStorage.getById(id);
     }
 
@@ -54,13 +57,15 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        userStorage.getById(userId);
+        validator.validateFilmId(filmId);
+        validator.validateUserId(userId);
         filmStorage.addLike(filmId, userId);
         feedService.createFeed(userId, EventType.LIKE, EventOperation.ADD, filmId);
     }
 
     public void removeLike(int filmId, int userId) {
-        userStorage.getById(userId);
+        validator.validateFilmId(filmId);
+        validator.validateUserId(userId);
         filmStorage.removeLike(filmId, userId);
         feedService.createFeed(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
     }
@@ -70,14 +75,23 @@ public class FilmService {
     }
 
     public Collection<Integer> getLikes(int id) {
+        validator.validateFilmId(id);
         return filmStorage.getLikes(id);
     }
 
     public Collection<Film> getCommonPopularFilms(int userId, int friendId, int count) {
-        userStorage.getById(userId);
-        userStorage.getById(friendId);
-
+        validator.validateUserId(userId);
+        validator.validateUserId(friendId);
         return filmStorage.getCommonPopularFilms(userId, friendId, count);
+    }
+
+    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
+        validator.validateDirectorId(directorId);
+        return filmStorage.getFilmsOfDirector(directorId, sortBy);
+    }
+
+    public Collection<Film> searchFilms(String query, String by) {
+        return filmStorage.searchFilms(query, by);
     }
 
     private void checkReleaseDate(Film film) {
@@ -85,14 +99,5 @@ public class FilmService {
             log.warn("Дата релиза не может быть раньше 28 декабря 1895 года");
             throw new InvalidValueException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
-    }
-
-    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
-        directorStorage.getById(directorId);
-        return filmStorage.getFilmsOfDirector(directorId, sortBy);
-    }
-
-    public Collection<Film> searchFilms(String query, String by) {
-        return filmStorage.searchFilms(query, by);
     }
 }

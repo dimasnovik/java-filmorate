@@ -3,15 +3,18 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @Log4j2
-@RestController()
-@RequestMapping(value = "/reviews", produces = "application/json")
+@RestController
+@RequestMapping("/reviews")
+@Validated
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewController {
     private final ReviewService reviewService;
@@ -27,13 +30,13 @@ public class ReviewController {
     }
 
     @PostMapping
-    public Review addReview(@RequestBody Review review) {
+    public Review addReview(@Valid @RequestBody Review review) {
         log.info("review-{} added.", review.getReviewId());
         return reviewService.addReview(review);
     }
 
     @PutMapping()
-    public Review updateReview(@RequestBody Review review) {
+    public Review updateReview(@Valid @RequestBody Review review) {
         log.info("review-{} updated.", review.getReviewId());
         return reviewService.update(review);
     }
