@@ -36,12 +36,12 @@ public class ErrorHandler {
         return Map.of("Wrong user", e.getMessage());
     }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public Map<String, String> handleOtherExceptions(final Throwable e) {
-//        log.debug("Получен статус 500 Internal server error {}", e.getMessage(), e);
-//        return Map.of("Непредвиденная ошибка", e.getMessage());
-//    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleOtherExceptions(final Throwable e) {
+        log.debug("Получен статус 500 Internal server error {}", e.getMessage(), e);
+        return Map.of("Непредвиденная ошибка", e.getMessage());
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)

@@ -19,7 +19,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @Component
@@ -162,11 +165,9 @@ public class ReviewDbStorage implements ReviewStorage {
             throw new NoSuchElementException("review error: user id < 1");
         }
 
-
         if (review.getFilmId() < 1) {
             throw new NoSuchElementException("review error: film id < 1");
         }
-
 
         if (review.getIsPositive() == null) {
             throw new InvalidValueException("review error: is_positive is null");
