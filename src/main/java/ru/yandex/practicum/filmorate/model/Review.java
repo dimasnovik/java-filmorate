@@ -6,14 +6,15 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor
 public class Review {
     private int reviewId;
 
-    @NotBlank(message = "Содержание отзыва не может быть пустым.")
-    @NotNull(message = "Содержание отзыва не может быть равно null.")
+    @NotBlank(message = "Содержание отзыва не может быть пустым или null.")
+    @Size(max = 2048, message = "Максимальная длина содержания отзыва составляет 2048 символов.")
     private final String content;
 
     @NotNull(message = "Оценка отзыва не может быть равна null.")

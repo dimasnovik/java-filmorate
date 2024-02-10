@@ -19,10 +19,11 @@ import java.util.Collection;
 public class ReviewController {
     private final ReviewService reviewService;
 
+    @Validated
     @GetMapping
     public Collection<Review> getReviews(@RequestParam(required = false) Integer filmId,
                                          @RequestParam(defaultValue = "0") int count) {
-        log.info("review list requested. added.");
+        log.info("review list requested. input parameters: filmId={}, count={}", filmId, count);
         if (filmId == null) {
             return reviewService.getReviewsSortByUseful();
         }
@@ -50,6 +51,7 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     public void removeReview(@PathVariable int id) {
         reviewService.removeReview(id);
+        log.info("review-{} remove.", id);
     }
 
     @PutMapping("/{reviewId}/like/{userId}")
