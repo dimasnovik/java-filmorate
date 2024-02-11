@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import com.zaxxer.hikari.util.FastList;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.daoUtils.RowMappers;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -126,39 +129,40 @@ public class FilmDbStorage implements FilmStorage {
     public Collection<Film> getPopular(int count, Integer genreId, Integer year) {
         try {
             if (genreId != null && year != null) {
-                return jdbcTemplate.queryForObject(
-                        "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
-                                "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
-                                "left join genres g on fg.genre_id = g.genre_id where f.film_id in " +
-                                "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id " +
-                                "left join genres g on fg.genre_id = g.genre_id where g.genre_id = ?) and extract(year from f.release_date) = ? " +
-                                "order by f.likes_count desc;", filmsRowMapper, genreId, year).stream().limit(count).collect(Collectors.toList());
+                List<Film> films = jdbcTemplate.query("select f.*, m.*, d.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                                "left join directors d on f.director_id = d.director_id where f.film_id in " +
+                                "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id left join genres g on " +
+                                "fg.genre_id = g.genre_id where g.genre_id = ?) and year(f.release_date) = ? order by f.likes_count desc limit ?",
+                        popularFilmsRowMapper(), genreId, year, count);
+
+                return addGenresToFilms(films);
+
             }
             if (genreId != null) {
-                return jdbcTemplate.queryForObject(
-                        "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
-                                "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
-                                "left join genres g on fg.genre_id = g.genre_id where f.film_id in " +
-                                "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id " +
-                                "left join genres g on fg.genre_id = g.genre_id where g.genre_id = ?) " +
-                                "order by f.likes_count desc;", filmsRowMapper, genreId).stream().limit(count).collect(Collectors.toList());
+                List<Film> films = jdbcTemplate.query("select f.*, m.*, d.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                        "left join directors d on f.director_id = d.director_id where f.film_id in " +
+                        "(select f.film_id from films f left join films_genres fg on f.film_id = fg.film_id left join genres g on " +
+                        "fg.genre_id = g.genre_id where g.genre_id = ?) order by f.likes_count desc limit ?", popularFilmsRowMapper(), genreId, count);
+
+                return addGenresToFilms(films);
+
             }
             if (year != null) {
-                return jdbcTemplate.queryForObject(
-                        "select f.*, m.*, d.*, fg.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
-                                "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
-                                "left join genres g on fg.genre_id = g.genre_id where extract(year from f.release_date) = ? " +
-                                "order by f.likes_count desc;", filmsRowMapper, year).stream().limit(count).collect(Collectors.toList());
+                List<Film> films = jdbcTemplate.query("select f.*, m.*, d.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                                "left join directors d on f.director_id = d.director_id where year(f.release_date) = ? order by f.likes_count limit ?",
+                        popularFilmsRowMapper(), year, count);
+
+                return addGenresToFilms(films);
             }
-            return jdbcTemplate.queryForObject(
-                    "select f.*, m.*, d.*, g.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
-                            "left join directors d on f.director_id = d.director_id left join films_genres fg on f.film_id = fg.film_id " +
-                            "left join genres g on fg.genre_id = g.genre_id " +
-                            "order by f.likes_count desc;", filmsRowMapper).stream().limit(count).collect(Collectors.toList());
+
+            List<Film> films = jdbcTemplate.query("select f.*, m.*, d.* from films f left join mpa m on f.mpa_id = m.mpa_id " +
+                    "left join directors d on f.director_id = d.director_id order by f.likes_count desc limit ?", popularFilmsRowMapper(), count);
+
+            return addGenresToFilms(films);
 
         } catch (EmptyResultDataAccessException e) {
             log.info(e.getMessage());
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 
@@ -255,5 +259,29 @@ public class FilmDbStorage implements FilmStorage {
         } else {
             jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?", null, film.getId());
         }
+    }
+
+    private RowMapper<Film> popularFilmsRowMapper() {
+        return (rs, rowNum) -> {
+            int filmId = rs.getInt("film_id");
+            Film film = new Film(rs.getString("film_name"), rs.getString("description"),
+                    rs.getDate("release_date").toLocalDate(), rs.getInt("duration"),
+                    new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")));
+            film.setId(filmId);
+            if (rs.getString("director_name") != null) {
+                film.getDirectors().add(new Director(rs.getInt("director_id"), rs.getString("director_name")));
+            }
+            return film;
+        };
+    }
+
+    private List<Film> addGenresToFilms(List<Film> films) {
+        return films.stream().map(film -> {
+            List<Genre> genres = jdbcTemplate.query("select g.* from genres g join films_genres fg on g.genre_id = fg.genre_id " +
+                    "join films f on fg.film_id = f.film_id where f.film_id = ?", (rs, rowNum) -> new Genre(rs.getInt("genre_id"),
+                    rs.getString("genre_name")), film.getId());
+            film.getGenres().addAll(genres);
+            return film;
+        }).collect(Collectors.toList());
     }
 }
