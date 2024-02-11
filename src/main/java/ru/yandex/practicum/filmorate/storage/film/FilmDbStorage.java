@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private  final RowMapper<List<Film>> filmsRowMapper;
+    private final RowMapper<List<Film>> filmsRowMapper;
 
     @Override
     public Film add(Film film) {
@@ -243,6 +243,7 @@ public class FilmDbStorage implements FilmStorage {
             return List.of();
         }
     }
+
     @Override
     public void validateId(int filmId) {
         try {
