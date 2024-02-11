@@ -26,4 +26,6 @@ public interface UserStorage {
 
     Collection<Film> getRecommend(int id);
 
+    void validateId(int id);
+
 }

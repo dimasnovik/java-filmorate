@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.exception.NoSuchReviewException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.daoUtils.IDValidator;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +27,6 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final IDValidator validator;
 
     @Override
     public Collection<Review> getReviews() {
@@ -46,9 +44,6 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Review addReview(Review review) {
         validateId(review);
-        validator.validateFilmId(review.getFilmId());
-        validator.validateUserId(review.getUserId());
-
         String sql = "INSERT INTO reviews (film_id, user_id, is_positive, content) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -80,9 +75,6 @@ public class ReviewDbStorage implements ReviewStorage {
         if (review.getFilmId() <= 0 || review.getUserId() <= 0) {
             throw new InvalidValueException("value <= 0");
         }
-        validator.validateFilmId(review.getFilmId());
-        validator.validateUserId(review.getUserId());
-
         int id = review.getReviewId();
 
         String sql = "UPDATE reviews SET is_positive = ?, content = ? WHERE review_id = ?";
@@ -96,9 +88,6 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void addOpinionToReview(int reviewId, int userId, boolean isLike) {
-        validator.validateFilmId(reviewId);
-        validator.validateUserId(userId);
-
         try {
             String sql = "INSERT INTO review_opinion (review_id, user_id, is_like) VALUES (?, ?, ?)";
             jdbcTemplate.update(sql, reviewId, userId, isLike);

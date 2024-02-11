@@ -15,4 +15,6 @@ public interface DirectorStorage {
 
     Collection<Director> getAll();
 
+    void validateId(int id);
+
 }

@@ -1,31 +1,33 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.daoUtils.RowMappers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @Component
 @Primary
-@AllArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private static final RowMapper<List<Film>> filmsRowMapper = RowMappers.filmsRowMapper();
-    private static final RowMapper<User> userRowMapper = RowMappers.userRowMapper();
+    private final RowMapper<List<Film>> filmsRowMapper;
+    private final RowMapper<User> userRowMapper;
 
     @Override
     public User add(User user) {
@@ -108,7 +110,7 @@ public class UserDbStorage implements UserStorage {
         List<Integer> likes = jdbcTemplate.query("SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ?",
                 ((rs, rowNum) -> rs.getInt("FILM_ID")), id);
         if (likes.isEmpty()) {
-            return new ArrayList<>();
+            return List.of();
         }
         String sqlForSearchUser = "SELECT USER_ID, COUNT(FILM_ID) AS SUMS  FROM FILMS_LIKES fl WHERE " +
                 "(FILM_ID IN (SELECT FILM_ID FROM FILMS_LIKES fl2 WHERE USER_ID = ?) AND USER_ID <> ?)" +
@@ -130,8 +132,18 @@ public class UserDbStorage implements UserStorage {
                     "ORDER BY f.FILM_ID";
             films = jdbcTemplate.queryForObject(sqlForSearchRecommend, filmsRowMapper, idUserWithSomeLikes, id);
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
+            return List.of();
         }
         return films;
+    }
+
+    @Override
+    public void validateId(int userId) {
+        try {
+            String sqlQuery = "SELECT user_id FROM users WHERE user_id = ?;";
+            jdbcTemplate.queryForObject(sqlQuery, Integer.class, userId);
+        } catch (DataAccessException e) {
+            throw new NoSuchUserException(String.format("Пользователь с id = %d не найден.", userId));
+        }
     }
 }

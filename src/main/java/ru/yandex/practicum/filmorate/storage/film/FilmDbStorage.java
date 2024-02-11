@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -10,22 +10,24 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.daoUtils.RowMappers;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 @Primary
-@AllArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
-    private JdbcTemplate jdbcTemplate;
-    private static final RowMapper<List<Film>> filmsRowMapper = RowMappers.filmsRowMapper();
+    private final JdbcTemplate jdbcTemplate;
+    private  final RowMapper<List<Film>> filmsRowMapper;
 
     @Override
     public Film add(Film film) {
@@ -100,7 +102,7 @@ public class FilmDbStorage implements FilmStorage {
                             "join MPA on f.MPA_ID = MPA.MPA_ID " +
                             "order by f.FILM_ID;", filmsRowMapper);
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
+            return List.of();
         }
     }
 
@@ -159,7 +161,7 @@ public class FilmDbStorage implements FilmStorage {
 
         } catch (EmptyResultDataAccessException e) {
             log.info(e.getMessage());
-            return Collections.emptyList();
+            return List.of();
         }
     }
 
@@ -188,7 +190,7 @@ public class FilmDbStorage implements FilmStorage {
                             "limit ?;", filmsRowMapper, userId, friendId, count);
         } catch (EmptyResultDataAccessException e) {
             log.info(e.getMessage());
-            return new ArrayList<>();
+            return List.of();
         }
     }
 
@@ -216,7 +218,7 @@ public class FilmDbStorage implements FilmStorage {
             return jdbcTemplate.queryForObject(sqlQuery.toString(), filmsRowMapper);
         } catch (EmptyResultDataAccessException e) {
             log.info(e.getMessage());
-            return new ArrayList<>();
+            return List.of();
         }
     }
 
@@ -241,17 +243,26 @@ public class FilmDbStorage implements FilmStorage {
                             "where d.DIRECTOR_ID = ? " +
                             "order by " + sortKey + ";", filmsRowMapper, directorId);
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
+            return List.of();
+        }
+    }
+    @Override
+    public void validateId(int filmId) {
+        try {
+            String sqlQuery = "SELECT film_id FROM FILMS WHERE film_id = ?;";
+            jdbcTemplate.queryForObject(sqlQuery, Integer.class, filmId);
+        } catch (DataAccessException e) {
+            throw new NoSuchUserException(String.format("Фильм с id = %d не найден.", filmId));
         }
     }
 
     private void addDirectorToFilm(Film film) {
         if (!film.getDirectors().isEmpty()) {
-            int directorId = film.getDirectors().get(0).getId();
+            int directorId = film.getDirectors().stream().findFirst().get().getId();
             jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?", directorId, film.getId());
             String directorName = jdbcTemplate.queryForObject("select DIRECTOR_NAME from DIRECTORS where DIRECTOR_ID = ?;",
                     (rs, rowNum) -> rs.getString("DIRECTOR_NAME"), directorId);
-            film.getDirectors().get(0).setName(directorName);
+            film.getDirectors().stream().findFirst().get().setName(directorName);
             log.info("В информацию о фильме с id = {} добавлен режиссер с id = {}", film.getId(), directorId);
         } else {
             jdbcTemplate.update("update FILMS set DIRECTOR_ID = ? where FILM_ID = ?", null, film.getId());
@@ -273,12 +284,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private List<Film> addGenresToFilms(List<Film> films) {
-        return films.stream().map(film -> {
+        return films.stream().peek(film -> {
             List<Genre> genres = jdbcTemplate.query("select g.* from genres g join films_genres fg on g.genre_id = fg.genre_id " +
                     "join films f on fg.film_id = f.film_id where f.film_id = ?", (rs, rowNum) -> new Genre(rs.getInt("genre_id"),
                     rs.getString("genre_name")), film.getId());
             film.getGenres().addAll(genres);
-            return film;
         }).collect(Collectors.toList());
     }
+
 }

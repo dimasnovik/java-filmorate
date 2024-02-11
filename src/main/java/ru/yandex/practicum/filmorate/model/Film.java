@@ -8,9 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
 public class Film {
@@ -36,5 +34,5 @@ public class Film {
     @NotNull
     private final Mpa mpa;
 
-    private List<Director> directors = new ArrayList<>();
+    private Set<Director> directors = new HashSet<>();
 }
