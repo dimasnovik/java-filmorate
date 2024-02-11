@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class FeedDbStorage implements FeedStorage {
 
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Feed> getFeed(int userId) {

@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.model.feed.EventType;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,9 +46,7 @@ public class ReviewService {
     }
 
     public Collection<Review> getReviewsSortByUseful() {
-        return reviewStorage.getReviews().stream()
-                .sorted(Comparator.comparing(Review::getUseful).reversed())
-                .collect(Collectors.toList());
+        return reviewStorage.getReviewsSortByUseful(Integer.MAX_VALUE);
     }
 
     public Collection<Review> getFilmReviewsSortedByUsefulness(int filmId, int count) {
@@ -58,9 +54,6 @@ public class ReviewService {
             count = Integer.MAX_VALUE;
         }
 
-        return reviewStorage.getReviewsByFilmId(filmId).stream()
-                .sorted(Comparator.comparing(Review::getUseful).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        return reviewStorage.getReviewsByFilmId(filmId, count);
     }
 }
