@@ -11,10 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -223,9 +220,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
+    public Collection<Film> getFilmsOfDirector(int directorId, SortBy sortBy) {
         String sortKey;
-        if (sortBy.equals("likes")) {
+        if (sortBy == SortBy.likes) {
             sortKey = "LIKES_COUNT";
         } else {
             sortKey = "YEAR(release_date)";

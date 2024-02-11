@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -100,11 +101,8 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
-                                               @RequestParam(defaultValue = "likes") String sortBy) {
+                                               @RequestParam(defaultValue = "likes") SortBy sortBy) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films/director", directorId));
-        if (!sortBy.equals("likes") && !sortBy.equals("year")) {
-            throw new InvalidValueException("Недопустимое значение параметра запроса SortBy, должен быть likes или year");
-        }
         return filmService.getFilmsOfDirector(directorId, sortBy);
     }
 }

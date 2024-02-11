@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.model.feed.EventOperation;
 import ru.yandex.practicum.filmorate.model.feed.EventType;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
@@ -85,7 +86,7 @@ public class FilmService {
         return filmStorage.getCommonPopularFilms(userId, friendId, count);
     }
 
-    public Collection<Film> getFilmsOfDirector(int directorId, String sortBy) {
+    public Collection<Film> getFilmsOfDirector(int directorId, SortBy sortBy) {
         directorStorage.validateId(directorId);
         return filmStorage.getFilmsOfDirector(directorId, sortBy);
     }

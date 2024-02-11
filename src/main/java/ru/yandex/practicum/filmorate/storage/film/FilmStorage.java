@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 
 import java.util.Collection;
 
@@ -23,7 +24,7 @@ public interface FilmStorage {
 
     Collection<Integer> getLikes(int id);
 
-    Collection<Film> getFilmsOfDirector(int directorId, String sortBy);
+    Collection<Film> getFilmsOfDirector(int directorId, SortBy sortBy);
 
     Collection<Film> getCommonPopularFilms(int userId, int friendId, int count);
 
