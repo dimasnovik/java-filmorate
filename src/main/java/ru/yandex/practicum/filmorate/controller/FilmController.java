@@ -1,13 +1,18 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
 
@@ -15,14 +20,10 @@ import java.util.Collection;
 @RequestMapping("/films")
 @Slf4j
 @Validated
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmController {
 
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @GetMapping
     public Collection<Film> getAll() {
@@ -40,6 +41,12 @@ public class FilmController {
     public Film update(@Valid @RequestBody Film film) {
         log.info("Получен PUT запрос на адрес: /films");
         return filmService.update(film);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteById(@Positive @PathVariable("id") int id) {
+        log.info(String.format("Получен DELETE запрос на адрес: %s/%d", "/films", id));
+        filmService.deleteById(id);
     }
 
     @GetMapping("/{id}")
@@ -67,8 +74,35 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopular(@Positive @RequestParam(defaultValue = "10") int count) {
+    public Collection<Film> getPopular(@Positive @RequestParam(defaultValue = "10") int count,
+                                       @RequestParam(required = false) Integer genreId,
+                                       @Min(1895) @RequestParam(required = false) Integer year) {
         log.info("Получен GET запрос на адрес: /films/popular");
-        return filmService.getTopFilms(count);
+        return filmService.getTopFilms(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    public Collection<Film> getCommonPopularFilms(
+            @Positive @RequestParam("userId") int userId,
+            @Positive @RequestParam("friendId") int friendId,
+            @Positive @RequestParam(defaultValue = "10") int count) {
+        log.info(String.format("Получен GET запрос на адрес: /films/common?userId=%d&friendId=%d", userId, friendId));
+        return filmService.getCommonPopularFilms(userId, friendId, count);
+    }
+
+    @GetMapping("/search")
+    public Collection<Film> searchFilms(@NotBlank @RequestParam("query") String query, @RequestParam("by") String by) {
+        if (!by.equals("director") && !by.equals("title") && !by.equals("title,director") && !by.equals("director,title")) {
+            throw new InvalidValueException("Недопустимое значение параметра запроса by, должен быть director/title/director,title");
+        }
+        return filmService.searchFilms(query, by);
+    }
+
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsOfDirector(@Positive @PathVariable("directorId") int directorId,
+                                               @RequestParam(defaultValue = "likes") SortBy sortBy) {
+        log.info(String.format("Получен GET запрос на адрес: %s/%d", "/films/director", directorId));
+        return filmService.getFilmsOfDirector(directorId, sortBy);
     }
 }

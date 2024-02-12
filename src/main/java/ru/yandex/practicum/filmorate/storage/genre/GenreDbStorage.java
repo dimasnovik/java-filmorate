@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class GenreDbStorage implements GenreStorage {
-    private  JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public Genre getById(int id) {

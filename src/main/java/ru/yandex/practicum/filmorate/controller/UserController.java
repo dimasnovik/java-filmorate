@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.feed.Feed;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -16,6 +19,8 @@ import java.util.Collection;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+
+    private final FeedService feedService;
 
     @GetMapping
     public Collection<User> getAll() {
@@ -33,6 +38,12 @@ public class UserController {
     public User update(@Valid @RequestBody User user) {
         log.info(String.format("Получен POST запрос на адрес: %s", "/users"));
         return userService.update(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable("id") Integer id) {
+        log.info(String.format("Получен DELETE запрос на адрес: %s/%d", "/users", id));
+        userService.deleteById(id);
     }
 
     @GetMapping("/{id}")
@@ -63,5 +74,16 @@ public class UserController {
     public Collection<User> getCommonFriends(@PathVariable("id") Integer id, @PathVariable("otherId") Integer otherId) {
         log.info(String.format("Получен GET запрос на адрес: %s/%d/friends/common/%d", "/users", id, otherId));
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public Collection<Film> getRecommend(@PathVariable("id") Integer id) {
+        log.info(String.format("Получен GET запрос на адрес: %s/%d/recommendations", "/users", id));
+        return userService.getRecommend(id);
+    }
+
+    @GetMapping("{id}/feed")
+    public Collection<Feed> getFeed(@PathVariable int id) {
+        return feedService.getFeed(id);
     }
 }
